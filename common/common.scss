@@ -9,6 +9,18 @@
 // ============================================================
 
 // ------------------------------------------------------------
+// 0 · Kırılma noktaları — mobil önce
+//     Temel kurallar telefon içindir; daha geniş ekranlar min-width ile eklenir.
+//     $chorus-genis   : büyük telefon, yatay telefon
+//     $chorus-tablet  : tablet ve masaüstü (odalar header'a çıkar, motifler büyür)
+//     $chorus-masaustu: geniş masaüstü
+//     (Discourse 640 px altında kendi mobil görünümüne geçer.)
+// ------------------------------------------------------------
+$chorus-genis: 601px;
+$chorus-tablet: 768px;
+$chorus-masaustu: 960px;
+
+// ------------------------------------------------------------
 // 1 · Fontlar — temanın içinde barınır, Google'a istek gitmez.
 //     latin + latin-ext birlikte Türkçe karakterlerin hepsini kapsar.
 // ------------------------------------------------------------
@@ -170,27 +182,35 @@ html {
   height: 2.1em;
 }
 
+// Telefonda (Discourse'un mobil görünümü) header'a her şey sığsın: giriş düğmesi simgesiz ve sıkı,
+// böylece logo ile düğme arasında boşluk kalır (320 px'lik ekranlarda da)
+.mobile-view .d-header .header-buttons .btn {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+
+  .d-icon {
+    display: none;
+  }
+}
+
 .d-header .title:not(.title--minimized) a:has(#site-logo.logo-big) {
   display: inline-flex;
   align-items: center;
   gap: 0.95em;
 
-  &::after {
-    content: "BY COMMON HOURS";
-    font-family: var(--chorus-mono);
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    line-height: 1;
-    color: var(--chorus-label);
-    white-space: nowrap;
-    padding-top: 0.35em; // wordmark taban çizgisine yaklaştır
-  }
-}
-
-@media (max-width: 700px) {
-  .d-header .title a::after {
-    display: none !important;
+  // telefonda header'da yer yok; "by common hours" tabletten itibaren
+  @media (min-width: $chorus-tablet) {
+    &::after {
+      content: "BY COMMON HOURS";
+      font-family: var(--chorus-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      line-height: 1;
+      color: var(--chorus-label);
+      white-space: nowrap;
+      padding-top: 0.35em; // wordmark taban çizgisine yaklaştır
+    }
   }
 }
 
@@ -361,7 +381,7 @@ aside.quote {
 
   // chorus field: daireler farklı sesler, örtüşme ilişkidir; gradient yok
   // (bant görseli yüklüyken grafik görselin içinde olduğu için CSS'teki kopya gizlenir)
-  @media (min-width: 960px) {
+  @media (min-width: $chorus-masaustu) {
     .--with-bg-img &::after,
     &.--with-bg-img::after {
       display: none;
@@ -710,32 +730,44 @@ button.chorus-ts {
   &:hover { background: #F3EEE4; }
 }
 
-// Story kartı penceresi
+// Story kartı penceresi (liste oluşturucu ve "önce beşlin" de aynı pencereyi kullanır)
+// Telefonda tam ekran, kapatma düğmesi hep görünür; tabletten itibaren ortada bir kart.
 .chorus-card-dialog {
   position: fixed;
   inset: 0;
   z-index: 1100;
   background: rgba(10, 10, 9, 0.82);
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  padding: 2vh 16px;
+  padding: 0;
 }
 .chorus-card-dialog__panel {
   position: relative;
   background: #171716;
-  border: 1px solid #3A3936;
+  border: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 28px;
-  padding: 28px;
-  max-height: 96vh;
-  overflow: auto;
-  max-width: 860px;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 16px;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 56px 16px calc(16px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
-.chorus-card-dialog__img { height: min(78vh, 720px); width: auto; display: block; }
+.chorus-card-dialog__img {
+  display: block;
+  align-self: center;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 56dvh;
+  object-fit: contain;
+}
 .chorus-card-dialog__side {
-  flex: 1 1 260px;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -747,19 +779,53 @@ button.chorus-ts {
 .chorus-card-dialog__actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 .chorus-card-dialog__link { font-family: var(--chorus-mono); font-size: var(--font-down-2); color: #8A857A; word-break: break-all; }
 .chorus-card-dialog__close {
-  position: absolute;
-  top: 8px;
+  position: fixed;
+  z-index: 2;
+  top: calc(8px + env(safe-area-inset-top));
   right: 8px;
   width: 44px;
   height: 44px;
-  background: none;
-  border: 0;
+  background: #171716;
+  border: 1px solid #3A3936;
+  border-radius: 50%;
   color: #F3EEE4;
   font-size: 28px;
   cursor: pointer;
 }
-@media (max-width: 700px) {
-  .chorus-card-dialog__img { height: auto; width: 100%; max-height: 60vh; object-fit: contain; }
+@media (min-width: $chorus-tablet) {
+  .chorus-card-dialog {
+    align-items: center;
+    padding: 2vh 16px;
+  }
+  .chorus-card-dialog__panel {
+    border: 1px solid #3A3936;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 28px;
+    width: auto;
+    height: auto;
+    max-height: 96vh;
+    max-width: 860px;
+    padding: 28px;
+    overflow: auto;
+    overscroll-behavior: auto;
+  }
+  .chorus-card-dialog__img {
+    align-self: auto;
+    height: min(78vh, 720px);
+    max-width: none;
+    max-height: none;
+    object-fit: fill;
+  }
+  .chorus-card-dialog__side { flex: 1 1 260px; }
+  .chorus-card-dialog__close {
+    position: absolute;
+    z-index: auto;
+    top: 8px;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
 }
 
 // beşli ve seçki listelerinde "Dinle" düğmesi ve satır altı oynatıcı
@@ -796,17 +862,20 @@ button.chorus-ts {
   align-items: center;
   gap: 10px 18px;
   margin: 12px 0 4px;
-  padding: 14px 18px;
+  padding: 12px 14px;
   background: #E3FF45;
   color: #171716;
-  box-shadow: 6px 6px 0 #F45139;
+  box-shadow: 4px 4px 0 #F45139;
+  @media (min-width: $chorus-tablet) { padding: 14px 18px; box-shadow: 6px 6px 0 #F45139; }
   p { margin: 0; flex: 1 1 320px; line-height: 1.45; }
   .btn-flat { color: #171716; }
   .btn-primary { background: #171716; color: #F3EEE4; }
 }
 .chorus-besli-banner__label { font-family: var(--chorus-mono); font-size: var(--font-down-2); letter-spacing: 0.14em; }
 .chorus-besli-banner__actions { display: flex; gap: 6px; }
-.chorus-gate__panel { max-width: 460px; }
+@media (min-width: $chorus-tablet) {
+  .chorus-gate__panel { max-width: 460px; }
+}
 .chorus-profile__vitrin .chorus-profile__secki { font-family: var(--chorus-display, inherit); }
 
 // ── Listeler: liste başlığı, satır ▶, çalan satır ─────────────────────────
@@ -849,13 +918,20 @@ button.chorus-ts {
 }
 
 // ── Kalıcı mini çalar ─────────────────────────────────────────────────────
+// Telefonda ekranın altında, kenardan kenara; tabletten itibaren sağ altta 560 px'lik kart.
 .chorus-mini {
-  position: fixed; z-index: 1001; right: 16px; bottom: 16px;
-  width: min(560px, calc(100vw - 32px));
+  position: fixed; z-index: 1001; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom));
+  width: auto;
   background: #171716; color: #F3EEE4;
-  border: 1px solid #3A3936; box-shadow: 8px 8px 0 #F45139;
-  padding: 10px 12px 12px;
+  border: 1px solid #3A3936; box-shadow: 5px 5px 0 #F45139;
+  padding: 8px 8px 10px;
   &[hidden] { display: none; }
+  @media (min-width: $chorus-tablet) {
+    left: auto; right: 16px; bottom: 16px;
+    width: min(560px, calc(100vw - 32px));
+    box-shadow: 8px 8px 0 #F45139;
+    padding: 10px 12px 12px;
+  }
 }
 body:has(#reply-control.open) .chorus-mini { bottom: auto; top: calc(var(--header-offset, 60px) + 12px); }
 .chorus-mini__top {
@@ -869,35 +945,69 @@ body:has(#reply-control.open) .chorus-mini { bottom: auto; top: calc(var(--heade
 .chorus-mini__label { color: #8A857A; flex: none; }
 .chorus-mini__list { color: #E3FF45; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; letter-spacing: 0.04em; }
 .chorus-mini__count { margin-left: auto; color: #8A857A; flex: none; }
-.chorus-mini__body { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.chorus-mini__body { display: grid; grid-template-columns: 1fr; gap: 10px; align-items: center; }
 .chorus-mini__frame iframe { display: block; width: 100%; border: 0; }
 .chorus-mini__sp { height: 80px; border-radius: 12px; }
 .chorus-mini__meta { display: none; }
-.chorus-mini.is-youtube .chorus-mini__body { grid-template-columns: 160px minmax(0, 1fr) auto; }
-.chorus-mini.is-youtube .chorus-mini__yt { width: 160px; height: 90px; }
+.chorus-mini.is-youtube .chorus-mini__body { grid-template-columns: 120px minmax(0, 1fr); }
+.chorus-mini.is-youtube .chorus-mini__yt { width: 120px; height: 68px; }
 .chorus-mini.is-youtube .chorus-mini__meta {
   display: flex; flex-direction: column; min-width: 0; gap: 2px;
   strong, span, em { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   span { color: #B7B1A3; font-size: var(--font-down-1); }
   em { color: #8A857A; font-family: var(--chorus-serif); font-size: var(--font-down-1); }
 }
+// telefonda kontroller tam genişlikte bir sıra, 40 px yüksekliğinde (parmakla basılır)
 .chorus-mini__ctrl {
-  display: flex; gap: 4px;
+  display: flex; gap: 4px; grid-column: 1 / -1; justify-content: space-between;
   button {
-    width: 36px; height: 36px; display: grid; place-items: center;
+    flex: 1; width: 36px; height: 40px; display: grid; place-items: center;
     background: transparent; color: #F3EEE4; border: 1px solid #3A3936; cursor: pointer; font-size: 14px;
-    &:hover:not(:disabled) { border-color: #E3FF45; color: #E3FF45; }
+    touch-action: manipulation;
     &:disabled { opacity: 0.3; cursor: default; }
   }
   [data-q="toggle"] { background: #E3FF45; color: #171716; border-color: #E3FF45; }
 }
-body.chorus-mini-open #main-outlet { padding-bottom: 150px; }
-@media (max-width: 700px) {
-  .chorus-mini { left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); width: auto; box-shadow: 5px 5px 0 #F45139; padding: 8px 8px 10px; }
-  .chorus-mini__body { grid-template-columns: 1fr; }
-  .chorus-mini.is-youtube .chorus-mini__body { grid-template-columns: 120px minmax(0, 1fr); }
-  .chorus-mini.is-youtube .chorus-mini__yt { width: 120px; height: 68px; }
-  .chorus-mini__ctrl { grid-column: 1 / -1; justify-content: space-between; button { flex: 1; } }
+@media (hover: hover) {
+  .chorus-mini__ctrl button:hover:not(:disabled) { border-color: #E3FF45; color: #E3FF45; }
+  .chorus-mini__ctrl [data-q="toggle"]:hover:not(:disabled) { color: #171716; }
+}
+// Telefonda çaları küçült (düğmeyi chorus-mobil.js ekler): çalar ince bir şeride iner,
+// yalnızca "şimdi çalıyor" satırı, şarkının adı ve kontroller kalır; şarkı çalmaya devam eder
+// (oynatıcı gizlenmez, yüksekliği sıfırlanıp kırpılır).
+.chorus-mini__kucult {
+  flex: none; display: grid; place-items: center;
+  width: 32px; height: 32px; margin: -7px -2px -7px 2px; padding: 0;
+  background: transparent; color: #F3EEE4; border: 1px solid #3A3936; cursor: pointer;
+  touch-action: manipulation;
+  svg { transition: transform 0.2s ease; }
+}
+.chorus-mini.is-kucuk .chorus-mini__kucult svg { transform: rotate(180deg); }
+@media not all and (min-width: $chorus-tablet) {
+  .chorus-mini.is-kucuk .chorus-mini__top { margin-bottom: 6px; }
+  .chorus-mini.is-kucuk .chorus-mini__body,
+  .chorus-mini.is-kucuk.is-youtube .chorus-mini__body { grid-template-columns: 1fr; row-gap: 6px; }
+  .chorus-mini.is-kucuk .chorus-mini__frame { height: 0; overflow: hidden; }
+  .chorus-mini.is-kucuk .chorus-mini__meta {
+    display: flex; flex-direction: row; align-items: baseline; gap: 8px; min-width: 0;
+    strong, span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    strong { flex: 0 1 auto; }
+    span { flex: 1 1 0; color: #B7B1A3; font-size: var(--font-down-1); }
+    em { display: none; }
+  }
+}
+@media (min-width: $chorus-tablet) {
+  .chorus-mini__kucult { display: none; }
+}
+// sayfanın sonu çaların altında kalmasın: telefonda çaların gerçek yüksekliği kadar boşluk
+// (--chorus-mini-h'yi chorus-mobil.js ölçer)
+body.chorus-mini-open #main-outlet { padding-bottom: calc(var(--chorus-mini-h, 180px) + 24px); }
+@media (min-width: $chorus-tablet) {
+  .chorus-mini__body { grid-template-columns: minmax(0, 1fr) auto; }
+  .chorus-mini.is-youtube .chorus-mini__body { grid-template-columns: 160px minmax(0, 1fr) auto; }
+  .chorus-mini.is-youtube .chorus-mini__yt { width: 160px; height: 90px; }
+  .chorus-mini__ctrl { grid-column: auto; justify-content: normal; button { flex: 0 1 auto; height: 36px; } }
+  body.chorus-mini-open #main-outlet { padding-bottom: 150px; }
 }
 
 // ── Liste oluşturucu ─────────────────────────────────────────────────────
@@ -920,7 +1030,7 @@ body.chorus-mini-open #main-outlet { padding-bottom: 150px; }
 }
 .chorus-builder__no { font-family: var(--chorus-mono); color: #8A857A; padding-top: 0.5em; }
 .chorus-builder__cells {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  display: grid; grid-template-columns: 1fr; gap: 6px;
   input { margin: 0; width: 100%; background: #1D1C1A; color: #F3EEE4; border: 1px solid #2D2C2B; padding: 0.45em 0.6em; }
   .chorus-builder__note { grid-column: 1 / -1; font-family: var(--chorus-serif); font-style: italic; }
   small { grid-column: 1 / -1; color: #8A857A; font-family: var(--chorus-mono); font-size: var(--font-down-2); }
@@ -929,10 +1039,22 @@ body.chorus-mini-open #main-outlet { padding-bottom: 150px; }
   display: flex; flex-direction: column; gap: 4px;
   button { width: 30px; height: 28px; background: transparent; color: #F3EEE4; border: 1px solid #3A3936; cursor: pointer; &:disabled { opacity: 0.25; } }
 }
-.chorus-builder__foot { display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: -28px; background: #171716; padding: 10px 0 0; }
+.chorus-builder__foot { display: flex; justify-content: space-between; align-items: center; position: sticky; bottom: calc(-16px - env(safe-area-inset-bottom)); background: #171716; padding: 10px 0 0; }
 .chorus-builder__count { font-family: var(--chorus-mono); color: #8A857A; }
-@media (max-width: 600px) {
-  .chorus-builder__cells { grid-template-columns: 1fr; }
+@media (min-width: $chorus-genis) {
+  .chorus-builder__cells { grid-template-columns: 1fr 1fr; }
+}
+@media (min-width: $chorus-tablet) {
+  .chorus-builder__foot { bottom: -28px; }
+}
+// Dokunmatik ekranda yazı kutuları 16 px: iPhone odaklanınca sayfayı büyütmesin
+@media (pointer: coarse) {
+  .chorus-builder__field input,
+  .chorus-builder__field textarea,
+  .chorus-builder__cells input,
+  .chorus-kor-oyun__form input {
+    font-size: 16px;
+  }
 }
 .chorus-play-all { white-space: nowrap; }
 .chorus-profile__head h3 { min-width: 0; }
@@ -974,37 +1096,21 @@ body.chorus-mini-open #main-outlet { padding-bottom: 150px; }
   .chorus-ts { font-size: var(--font-down-1); }
 }
 
-// Story kartı penceresi telefonda: tam ekran, kapatma düğmesi hep görünür
-@media (max-width: 700px) {
-  .chorus-card-dialog { padding: 0; align-items: stretch; }
-  .chorus-card-dialog__panel {
-    width: 100%; max-width: none; max-height: 100dvh; height: 100dvh;
-    padding: 56px 16px calc(16px + env(safe-area-inset-bottom)); gap: 16px;
-    flex-direction: column; flex-wrap: nowrap; border: 0; overflow-y: auto;
-  }
-  .chorus-card-dialog__img { align-self: center; width: auto; height: auto; max-width: 100%; max-height: 56dvh; object-fit: contain; }
-  .chorus-card-dialog__side { flex: 0 0 auto; }
-  .chorus-card-dialog__close {
-    position: fixed; z-index: 2; top: calc(8px + env(safe-area-inset-top)); right: 8px;
-    background: #171716; border: 1px solid #3A3936; border-radius: 50%;
-  }
-  .chorus-builder__panel { padding-top: 56px; }
-}
 
 // ── Ziyaretçi vitrini ─────────────────────────────────────────────────────
 body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-banner { display: none; }
-.chorus-vitrin { display: flex; flex-direction: column; gap: 56px; margin: 20px 0 48px; color: #F3EEE4; }
+.chorus-vitrin { display: flex; flex-direction: column; gap: 40px; margin: 20px 0 48px; color: #F3EEE4; }
 .chorus-vitrin__kicker { margin: 0; font-family: var(--chorus-mono); font-size: var(--font-down-2); letter-spacing: 0.16em; color: #E3FF45; }
 .chorus-vitrin__hero {
   padding: clamp(28px, 6vw, 72px) clamp(20px, 5vw, 64px);
-  background: #171716; border: 1px solid #2D2C2B; box-shadow: 10px 10px 0 #2948B1;
+  background: #171716; border: 1px solid #2D2C2B; box-shadow: 6px 6px 0 #2948B1;
   h1 { margin: 14px 0 16px; font-size: clamp(2.4rem, 6vw, 4.6rem); line-height: 0.95; letter-spacing: -0.03em; max-width: 14ch; }
 }
 .chorus-vitrin__lead { max-width: 40em; margin: 0 0 32px; font-family: var(--chorus-serif); font-style: italic; font-size: var(--font-up-2); line-height: 1.4; color: #D8D2C4; }
 .chorus-vitrin__doors { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
 .chorus-vitrin__door {
   display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left;
-  padding: 18px 18px 20px; background: transparent; color: #F3EEE4; border: 1px solid #3A3936; cursor: pointer;
+  padding: 14px 16px 16px; background: transparent; color: #F3EEE4; border: 1px solid #3A3936; cursor: pointer;
   strong { font-size: var(--font-up-2); }
   em { font-style: normal; color: #B7B1A3; font-size: var(--font-down-1); line-height: 1.4; }
   &:hover { border-color: #E3FF45; }
@@ -1030,7 +1136,8 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
   .chorus-vitrin__no { padding-top: 6px; }
 }
 .chorus-vitrin__track { display: flex; flex-direction: column; span { color: #8A857A; font-size: var(--font-down-1); } em { font-family: var(--chorus-serif); color: #D8D2C4; } }
-.chorus-vitrin__wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+// telefonda iki sütun (üye ana sayfasında da); tabletten itibaren sığdığı kadar
+.chorus-vitrin__wall { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .chorus-vitrin__card { display: flex; flex-direction: column; gap: 6px; min-width: 0; a { color: #F3EEE4; } }
 .chorus-vitrin__collage {
   position: relative; display: grid; grid-template-columns: 1fr 1fr; aspect-ratio: 1 / 1; padding: 0; border: 0; cursor: pointer; overflow: hidden; background: #2C2B28;
@@ -1041,9 +1148,11 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
   border-radius: 50%; background: #E3FF45; color: #171716; font-size: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.4);
   transition: transform .15s ease;
 }
-.chorus-vitrin__collage:hover .chorus-vitrin__play { transform: scale(1.08); }
+@media (hover: hover) {
+  .chorus-vitrin__collage:hover .chorus-vitrin__play { transform: scale(1.08); }
+}
 .chorus-vitrin__origin {
-  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); background: #F45139; color: #171716; overflow: hidden;
+  display: grid; grid-template-columns: 1fr; background: #F45139; color: #171716; overflow: hidden;
   img { width: 100%; height: 100%; object-fit: cover; display: block; min-height: 220px; }
   > span { display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: clamp(20px, 4vw, 48px); }
   .chorus-vitrin__kicker { color: #171716; }
@@ -1056,11 +1165,12 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
   p { margin: 0 auto 0 0; font-family: var(--chorus-serif); font-style: italic; font-size: var(--font-up-2); }
   .btn-primary { background: #E3FF45; color: #171716; }
 }
-@media (max-width: 700px) {
-  .chorus-vitrin { gap: 40px; }
-  .chorus-vitrin__hero { box-shadow: 6px 6px 0 #2948B1; }
-  .chorus-vitrin__wall { grid-template-columns: 1fr 1fr; gap: 12px; }
-  .chorus-vitrin__origin { grid-template-columns: 1fr; }
+@media (min-width: $chorus-tablet) {
+  .chorus-vitrin { gap: 56px; }
+  .chorus-vitrin__hero { box-shadow: 10px 10px 0 #2948B1; }
+  .chorus-vitrin__door { padding: 18px 18px 20px; }
+  .chorus-vitrin__wall { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 18px; }
+  .chorus-vitrin__origin { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
 }
 // kolaj: dört kapak, her biri karenin dörtte biri (button içinde grid yerine mutlak yerleşim)
 .chorus-vitrin__collage {
@@ -1091,7 +1201,9 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
 // Üyenin ana sayfası: vitrinin kısa hali
 .chorus-vitrin.is-member { gap: 36px; margin-bottom: 28px; }
 .chorus-vitrin__mhead h1 { margin: 6px 0 0; font-size: clamp(1.8rem, 4vw, 2.8rem); letter-spacing: -0.02em; }
-.chorus-vitrin.is-member .chorus-vitrin__wall { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+@media (min-width: $chorus-tablet) {
+  .chorus-vitrin.is-member .chorus-vitrin__wall { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+}
 // Discourse'un İngilizce karşılama bandı hiçbir sayfada görünmesin (arama üst çubukta duruyor)
 .welcome-banner { display: none; }
 
@@ -1128,17 +1240,20 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
 .chorus-radyo__defter:hover { color: #f3eee4; }
 
 // ── Seçki kapağı ──
+// telefonda kapak listenin üstünde, 160 px; tabletten itibaren solda 180 px
 .chorus-vitrin__secki-wrap {
-  display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 22px; align-items: start;
+  display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start;
 }
 .chorus-vitrin__secki-kapak {
-  position: relative; display: block; width: 100%; aspect-ratio: 1 / 1; padding: 0; border: 0; cursor: pointer; overflow: hidden; background: #2c2b28;
+  position: relative; display: block; width: 100%; max-width: 160px; aspect-ratio: 1 / 1; padding: 0; border: 0; cursor: pointer; overflow: hidden; background: #2c2b28;
   &.is-own > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  &:hover .chorus-vitrin__play { transform: scale(1.08); }
 }
-@media (max-width: 700px) {
-  .chorus-vitrin__secki-wrap { grid-template-columns: 1fr; }
-  .chorus-vitrin__secki-kapak { max-width: 220px; }
+@media (hover: hover) {
+  .chorus-vitrin__secki-kapak:hover .chorus-vitrin__play { transform: scale(1.08); }
+}
+@media (min-width: $chorus-tablet) {
+  .chorus-vitrin__secki-wrap { grid-template-columns: 180px minmax(0, 1fr); gap: 22px; }
+  .chorus-vitrin__secki-kapak { max-width: none; }
 }
 
 // ── Liste oluşturucu ──
@@ -1189,7 +1304,9 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
 .chorus-muz__kart {
   display: flex; flex-direction: column; min-width: 0; background: #1d1c1a; border: 1px solid #3a3936; border-top: 4px solid var(--chorus-riot);
   transition: box-shadow 0.2s ease, transform 0.2s ease;
-  &:hover { box-shadow: 6px 6px 0 var(--chorus-riot); transform: translate(-2px, -2px); }
+  @media (hover: hover) {
+    &:hover { box-shadow: 6px 6px 0 var(--chorus-riot); transform: translate(-2px, -2px); }
+  }
 }
 .chorus-muz__kapak { display: block; aspect-ratio: 16 / 9; overflow: hidden; img { width: 100%; height: 100%; object-fit: cover; display: block; } }
 .chorus-muz__govde { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px 16px; flex: 1; }
@@ -1202,11 +1319,15 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
 .chorus-muz__govde p { margin: 0; color: #d8d2c4; font-family: var(--chorus-serif); line-height: 1.45; }
 .chorus-muz__eylem { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin-top: auto; padding-top: 6px; }
 .chorus-muz__oku, .chorus-muz__oku:visited {
-  display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; background: var(--chorus-riot); color: #171716;
+  display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; background: var(--chorus-riot); color: #171716;
   font-family: var(--chorus-mono); font-size: var(--font-down-1); text-decoration: none;
 }
 .chorus-muz__oku:hover { background: #f3eee4; color: #171716; }
-.chorus-muz__konus, .chorus-muz__konus:visited { color: #b7b1a3; font-family: var(--chorus-mono); font-size: var(--font-down-1); }
+.chorus-muz__konus, .chorus-muz__konus:visited { display: inline-flex; align-items: center; min-height: 44px; color: #b7b1a3; font-family: var(--chorus-mono); font-size: var(--font-down-1); }
+@media (min-width: $chorus-tablet) {
+  .chorus-muz__oku, .chorus-muz__oku:visited { min-height: 36px; padding: 0 12px; }
+  .chorus-muz__konus, .chorus-muz__konus:visited { display: inline; align-items: normal; min-height: auto; }
+}
 .chorus-muz__konus:hover { color: var(--chorus-riot); }
 // Common Hours'tan gelen konu: ilk gönderide pembe çizgi
 body.category-oku-muzikoloji #post_1 .cooked { border-left: 3px solid var(--chorus-riot); padding-left: 14px; }
@@ -1214,7 +1335,8 @@ body.category-oku-muzikoloji #post_1 .cooked { border-left: 3px solid var(--chor
 // ── Kör Dinleme oyunu ──
 .chorus-kor--oyun.is-locked .chorus-kor__veil .chorus-kor__hint { display: none; }
 .chorus-kor-oyun {
-  max-width: 680px; margin: 14px 0 0; padding: 16px 18px; background: #1d1c1a; border: 1px solid #3a3936; box-shadow: 6px 6px 0 #2948b1;
+  max-width: 680px; margin: 14px 0 0; padding: 14px; background: #1d1c1a; border: 1px solid #3a3936; box-shadow: 4px 4px 0 #2948b1;
+  @media (min-width: $chorus-tablet) { padding: 16px 18px; box-shadow: 6px 6px 0 #2948b1; }
 }
 .chorus-kor-oyun__ust { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
 .chorus-kor-oyun__etiket { font-family: var(--chorus-mono); font-size: var(--font-down-2); letter-spacing: 0.14em; color: #e3ff45; }
@@ -1230,7 +1352,8 @@ body.category-oku-muzikoloji #post_1 .cooked { border-left: 3px solid var(--chor
 .chorus-kor-oyun__form {
   display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0;
   &[hidden] { display: none; }
-  input { flex: 1 1 220px; margin: 0; min-height: 40px; background: #171716; color: #f3eee4; border: 1px solid #3a3936; padding: 0 0.7em; }
+  input { flex: 1 1 220px; margin: 0; min-height: 44px; background: #171716; color: #f3eee4; border: 1px solid #3a3936; padding: 0 0.7em; }
+  @media (min-width: $chorus-tablet) { input { min-height: 40px; } }
 }
 .chorus-kor-oyun__liste {
   list-style: none; margin: 12px 0 0; padding: 0;
@@ -1269,22 +1392,24 @@ body.category-oku-muzikoloji #post_1 .cooked { border-left: 3px solid var(--chor
   .chorus-dortluk__izgara.is-sallan { animation: dortluk-sallan 0.35s ease; }
 }
 @keyframes dortluk-sallan { 0%, 100% { transform: none; } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
-.chorus-dortluk__izgara { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.chorus-dortluk__izgara { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .chorus-dortluk__kutu {
-  position: relative; display: flex; min-height: 84px; background: #2c2b28; border: 1px solid #3a3936;
+  position: relative; display: flex; min-height: 96px; background: #2c2b28; border: 1px solid #3a3936;
   &.is-secili { background: #f3eee4; border-color: #f3eee4; .chorus-dortluk__sec { color: #171716; } .chorus-dortluk__sec span { color: #3a3936; } }
 }
 .chorus-dortluk__sec {
-  flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 10px 30px 10px 10px; min-width: 0;
+  flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 8px 6px 34px; min-width: 0;
   background: none; border: 0; color: #f3eee4; text-align: left; cursor: pointer;
-  strong { font-size: var(--font-down-1); line-height: 1.2; overflow-wrap: anywhere; }
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+  strong { font-size: var(--font-down-2); line-height: 1.2; overflow-wrap: anywhere; }
   span { color: #8a857a; font-size: var(--font-down-2); overflow-wrap: anywhere; }
   &:disabled { cursor: default; }
   &:focus-visible { outline: 2px solid #e3ff45; outline-offset: -2px; }
 }
 .chorus-dortluk__dinle {
-  position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; display: grid; place-items: center; padding: 0;
+  position: absolute; bottom: 4px; right: 4px; width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
   border: 1px solid #3a3936; border-radius: 50%; background: #171716; color: #e3ff45; font-size: 10px; cursor: pointer;
+  touch-action: manipulation;
   &.is-yukleniyor { opacity: 0.5; }
   &:disabled { opacity: 0.3; cursor: default; }
 }
@@ -1295,11 +1420,11 @@ body.category-oku-muzikoloji #post_1 .cooked { border-left: 3px solid var(--chor
 .chorus-dortluk__kareler { margin: 0 0 10px; padding: 0; background: none; font-size: 20px; line-height: 1.2; letter-spacing: 2px; }
 .chorus-dortluk__hata { color: #f45139; }
 body[data-chorus-dortluk-locked] [id^="post_"]:not(#post_1) .cooked { filter: blur(7px); user-select: none; pointer-events: none; }
-@media (max-width: 600px) {
-  .chorus-dortluk__izgara { gap: 5px; }
-  .chorus-dortluk__kutu { min-height: 92px; }
-  .chorus-dortluk__sec { padding: 8px 6px 26px; strong { font-size: var(--font-down-2); } }
-  .chorus-dortluk__dinle { top: auto; bottom: 4px; right: 4px; }
+@media (min-width: $chorus-genis) {
+  .chorus-dortluk__izgara { gap: 8px; }
+  .chorus-dortluk__kutu { min-height: 84px; }
+  .chorus-dortluk__sec { padding: 10px 30px 10px 10px; strong { font-size: var(--font-down-1); } }
+  .chorus-dortluk__dinle { top: 6px; bottom: auto; right: 6px; width: 24px; height: 24px; }
 }
 
 // ── Günün Sorusu ──
