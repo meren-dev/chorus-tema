@@ -3,20 +3,52 @@
    Menüde Takıl'ın yanında Kepenk'in yüzü. Normalde yarı uykulu ve hınzır;
    Takıl'da senin için yeni bir şey varsa kulaklarını diker, ara ara göz kırpar. */
 
+/* Telefonda header'daki Kepenk gizli: Takıl, Kepenk'in yüzüyle birlikte oda şeridinde duruyor
+   (header'da bir simge az, iki Takıl yok). Tabletten itibaren header'da. */
 .chorus-takil-li {
-  display: flex;
+  display: none;
   align-items: center;
 }
+@media (min-width: $chorus-tablet) {
+  .chorus-takil-li {
+    display: flex;
+  }
+}
 
+/* Telefonda yalnızca Kepenk'in yüzü (Takıl yazısı alttaki oda şeridinde zaten var;
+   header'da giriş düğmesine ve logoya yer kalsın). Yüz 40 px'lik bir dokunma alanında durur.
+   Tabletten itibaren yüz + "Takıl". */
 .chorus-takil {
   display: inline-flex;
   align-items: center;
-  gap: 0.35em;
-  padding: 0.25em 0.55em;
+  justify-content: center;
+  gap: 0;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 7px;
   color: var(--primary-high);
   font-weight: 600;
   text-decoration: none;
   line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chorus-takil__ad {
+  display: none;
+}
+
+@media (min-width: $chorus-tablet) {
+  .chorus-takil {
+    justify-content: normal;
+    gap: 0.35em;
+    min-width: auto;
+    min-height: auto;
+    padding: 0.25em 0.55em;
+  }
+
+  .chorus-takil__ad {
+    display: inline;
+  }
 }
 
 /* Ziyaret edilmiş link rengi (temadaki domates) menüde bağırmasın */
@@ -118,10 +150,4 @@
   0%, 66%, 78%, 100% { transform: translateY(-1px) rotate(-7deg); }
   70% { transform: translateY(-1.5px) rotate(-17deg); }
   74% { transform: translateY(-1px) rotate(-3deg); }
-}
-
-@media (max-width: 380px) {
-  .chorus-takil__ad {
-    display: none;
-  }
 }
