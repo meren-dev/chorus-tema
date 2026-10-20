@@ -1,3 +1,14 @@
+
+# --- Doku bileşeninden ---
+takil_kategori:
+  type: integer
+  default: 17
+  description: "Takıl kategorisi (boş aramadaki 'Takıl'da sor' bağlantısı)"
+dinle_kategori:
+  type: integer
+  default: 14
+  description: "Dinle kategorisi (boş aramadaki 'Listelere göz at' bağlantısı)"
+
 # --- Odalar bileşeninden ---
 oda_dinle:
   type: integer
