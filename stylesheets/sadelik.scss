@@ -34,3 +34,77 @@ body.chorus-oda-giris-on .category-breadcrumb {
 .top-section.top-categories-section {
   display: none;
 }
+
+/* ---------- Telefonda sadelik (Discourse'un mobil görünümü, 640 px altı) ----------
+   Daha az düğme, daha ferah satırlar, daha küçük avatarlar. Masaüstüne dokunmaz. */
+.mobile-view {
+  /* Header: avatar daha küçük */
+  .d-header .header-dropdown-toggle img.avatar {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Konu listeleri: sütun başlıkları yok, küçük avatar, satırlar arasında nefes */
+  .topic-list thead {
+    display: none;
+  }
+  .topic-list .topic-list-item > .topic-list-data {
+    padding: 14px 0;
+  }
+  .topic-list .topic-list-item .pull-left {
+    margin-right: 12px;
+  }
+  .topic-list .topic-list-item .pull-left img.avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .topic-list .topic-list-item .topic-item-metadata {
+    margin-left: 44px;
+  }
+  .topic-list .main-link a.title {
+    font-size: var(--font-0);
+    line-height: 1.35;
+  }
+  .topic-list .topic-item-stats {
+    margin-top: 6px;
+    font-size: var(--font-down-1);
+  }
+
+  /* Liste düğmeleri: telefonda yalnızca sıralama ve yeni konu kalır
+     (toplu seçim, kategori düzenleme, taslak menüsü ve bildirim zili masaüstünde) */
+  .list-controls .bulk-select,
+  .list-controls .edit-category,
+  .list-controls .topic-drafts-menu-trigger,
+  .list-controls .notifications-tracking-trigger {
+    display: none;
+  }
+
+  /* Alt kategori yolu: çerçevesiz, sade; etiket seçici yok */
+  .category-breadcrumb li:has(.tag-drop) {
+    display: none;
+  }
+  .category-breadcrumb {
+    --d-nav-border-color--active: transparent;
+    --input-border-color: transparent;
+  }
+  .category-breadcrumb details.select-kit summary.select-kit-header {
+    background: transparent;
+    padding-left: 0.2em;
+  }
+
+  /* Sayfa sonundaki "Powered by Discourse" */
+  .powered-by-discourse {
+    display: none;
+  }
+
+  /* Konu sonundaki "şu kadar yeni konu kaldı" cümlesi */
+  .more-topics__browse-more {
+    display: none;
+  }
+
+  /* Menü: kullanılmayan etiketler ve sohbet araması bölümü yok */
+  .menu-panel .sidebar-section[data-section-name="tags"],
+  .menu-panel .sidebar-section[data-section-name="chat-search"] {
+    display: none;
+  }
+}
