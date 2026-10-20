@@ -1312,6 +1312,8 @@ body[data-chorus-dortluk-locked] [id^="post_"]:not(#post_1) .cooked { filter: bl
 .chorus-soru__alt { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .chorus-soru__seri { font-family: var(--chorus-mono); font-size: var(--font-down-1); color: #e3ff45; }
 .chorus-bugun__bicim { font-family: var(--chorus-mono); font-size: var(--font-down-2); letter-spacing: 0.14em; color: #e3ff45; margin-right: 6px; }
+// --- Doku ---
+@import "doku";
 // --- Emoji boyutu ---
 @import "emoji-boyutu";
 // --- Odalar ---
