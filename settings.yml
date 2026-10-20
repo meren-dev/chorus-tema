@@ -1,14 +1,3 @@
-
-# --- Doku bileşeninden ---
-takil_kategori:
-  type: integer
-  default: 17
-  description: "Takıl kategorisi (boş aramadaki 'Takıl'da sor' bağlantısı)"
-dinle_kategori:
-  type: integer
-  default: 14
-  description: "Dinle kategorisi (boş aramadaki 'Listelere göz at' bağlantısı)"
-
 # --- Odalar bileşeninden ---
 oda_dinle:
   type: integer
@@ -45,10 +34,10 @@ dort_dortluk:
 
 # --- Takıl Kepenk bileşeninden ---
 takil_adresi:
-  default: "/c/acik-masalar/7"
+  default: "/c/takil/17"
   description: "Takıl'a tıklayınca açılacak sayfa"
 takil_kategorileri:
   type: list
   list_type: category
-  default: "5|9|6|7"
+  default: "17|5|9|7|6|8|13|2"
   description: "Bu kategorilerde okumadığın yeni bir şey olunca Kepenk uyanır"
