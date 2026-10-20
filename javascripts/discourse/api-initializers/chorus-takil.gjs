@@ -7,6 +7,8 @@ import { apiInitializer } from "discourse/lib/api";
 
 // Kepenk, Takıl'da senin için yeni bir şey varsa uyanır.
 // "Gördüm" sayısı tarayıcıda tutulur; Takıl'a tıklayınca Kepenk yine uyuklar.
+// Telefonda header'daki Kepenk gizli; Takıl oda şeridinde duruyor. Şeritteki Takıl'a
+// dokunmak da "gördüm" sayılır (şeritteki yüzün uyanıklığı da bu bileşenden gelir).
 const ANAHTAR = "chorus-takil-gordum";
 
 function okuGordum() {
@@ -48,12 +50,21 @@ class TakilKepenk extends Component {
       );
     }
     this.gordum = g;
+    document.addEventListener("click", this.seritTiklandi, true);
   }
 
   willDestroy() {
     super.willDestroy(...arguments);
     if (this.dinleyici !== undefined) {
       this.topicTrackingState.offStateChange(this.dinleyici);
+    }
+    document.removeEventListener("click", this.seritTiklandi, true);
+  }
+
+  @action
+  seritTiklandi(e) {
+    if (e.target?.closest?.(".chorus-oda-serit .chorus-oda--takil")) {
+      this.tiklandi();
     }
   }
 

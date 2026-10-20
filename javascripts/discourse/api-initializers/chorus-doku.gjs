@@ -12,6 +12,8 @@ import { ajax } from "discourse/lib/ajax";
 //    tek cümle söyler; boştayken arada bir yavaşça göz kırpar.
 // 2) Arama sonuç vermeyince Kepenk'li, yönlendiren bir boş ekran.
 // 3) Beşli eşleşmesi: ortak şarkı ya da sanatçı varsa Kepenk köşede kulak diker, ana sayfada not bırakır.
+// 4) Telefonda Kepenk'e dokununca balonda iki seçenek: "Küçült" (yalnızca kulakları görünür, dokununca
+//    geri gelir; bu tarayıcıda hatırlanır) ve "Bugünlük gizle" (24 saat görünmez).
 
 const RADYO = "/chat/c/kepenk-radyosu/3";
 
@@ -67,6 +69,9 @@ function kategoriUrl(site, id, yedek) {
 const ONBELLEK = "chorus-besli-onbellek";
 const GORDUM = "chorus-eslesme-gordum";
 const GUN = 86400000;
+const KUCUK = "chorus-kepenk-kucuk";
+const GIZLI = "chorus-kepenk-gizli";
+const UYANDI = { metin: "Buradayım. Kalabalık edersem yine küçült." };
 
 function depoOku(anahtar, yedek) {
   try {
@@ -260,6 +265,8 @@ class KoseKepenk extends Component {
 
   @tracked acik = false;
   @tracked soz = null;
+  @tracked kucuk = depoOku(KUCUK, false) === true;
+  @tracked gizliSon = Number(depoOku(GIZLI, 0)) || 0;
 
   sira = 0;
   sonBaglam = null;
@@ -278,6 +285,10 @@ class KoseKepenk extends Component {
 
   get haber() {
     return haberler.liste[0];
+  }
+
+  get gizli() {
+    return this.gizliSon > Date.now();
   }
 
   goster(soz) {
@@ -318,6 +329,16 @@ class KoseKepenk extends Component {
 
   @action
   tikla() {
+    if (this.kucuk) {
+      // küçükken dokununca önce uyanır
+      this.kucuk = false;
+      depoYaz(KUCUK, false);
+      if (!this.haber) {
+        this.sonBaglam = "uyandi";
+        this.goster(UYANDI);
+        return;
+      }
+    }
     const h = this.haber;
     if (h) {
       haberGordum(h);
@@ -345,8 +366,30 @@ class KoseKepenk extends Component {
     clearTimeout(this.zamanlayici);
   }
 
+  @action
+  kucult() {
+    this.kapat();
+    this.kucuk = true;
+    depoYaz(KUCUK, true);
+  }
+
+  @action
+  gizle() {
+    this.kapat();
+    this.gizliSon = Date.now() + GUN;
+    depoYaz(GIZLI, this.gizliSon);
+  }
+
+  get dugmeEtiketi() {
+    if (this.kucuk) {
+      return "Kepenk küçüldü: dokun, geri gelsin";
+    }
+    return this.haber ? "Kepenk: sana bir haberi var" : "Kepenk";
+  }
+
   <template>
-    <div class="kepenk-kose {{if this.acik 'is-konusuyor'}} {{if this.haber 'has-haber'}}">
+    {{#unless this.gizli}}
+    <div class="kepenk-kose {{if this.acik 'is-konusuyor'}} {{if this.haber 'has-haber'}} {{if this.kucuk 'is-kucuk'}}">
       {{#if this.acik}}
         <div class="kepenk-balon" role="status">
           <button type="button" class="kepenk-balon__kapat" aria-label="Kapat" {{on "click" this.kapat}}>×</button>
@@ -354,9 +397,13 @@ class KoseKepenk extends Component {
           {{#if this.soz.link}}
             <a href={{this.soz.link}} {{on "click" this.kapat}}>{{this.soz.linkMetin}}</a>
           {{/if}}
+          <div class="kepenk-balon__eylem">
+            <button type="button" class="kepenk-balon__secenek" {{on "click" this.kucult}}>Küçült</button>
+            <button type="button" class="kepenk-balon__secenek" {{on "click" this.gizle}}>Bugünlük gizle</button>
+          </div>
         </div>
       {{/if}}
-      <button type="button" class="kepenk-kose__dugme" aria-label={{if this.haber "Kepenk: sana bir haberi var" "Kepenk"}} aria-expanded={{if this.acik "true" "false"}} {{on "click" this.tikla}}>
+      <button type="button" class="kepenk-kose__dugme" aria-label={{this.dugmeEtiketi}} aria-expanded={{if this.acik "true" "false"}} {{on "click" this.tikla}}>
         <span class="kepenk-kose__nokta" aria-hidden="true"></span>
         <svg class="kepenk-yuz" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
           <path class="k-kulaklik" d="M3.4 14.2C3 3.6 21 3.6 20.6 14.2" fill="none" stroke="#E3FF45" stroke-width="1.6" stroke-linecap="round"/>
@@ -394,6 +441,7 @@ class KoseKepenk extends Component {
         </svg>
       </button>
     </div>
+    {{/unless}}
   </template>
 }
 
