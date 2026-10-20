@@ -1,0 +1,71 @@
+{
+  "name": "Chorus",
+  "component": false,
+  "license_url": null,
+  "about_url": null,
+  "authors": null,
+  "theme_version": null,
+  "minimum_discourse_version": null,
+  "maximum_discourse_version": null,
+  "assets": {
+    "plex_sans_latin": "assets/plex_sans_latin.woff2",
+    "plex_sans_latin_ext": "assets/plex_sans_latin_ext.woff2",
+    "plex_mono_400_latin": "assets/plex_mono_400_latin.woff2",
+    "plex_mono_400_latin_ext": "assets/plex_mono_400_latin_ext.woff2",
+    "plex_mono_500_latin": "assets/plex_mono_500_latin.woff2",
+    "plex_mono_500_latin_ext": "assets/plex_mono_500_latin_ext.woff2",
+    "newsreader_italic_latin": "assets/newsreader_italic_latin.woff2",
+    "newsreader_italic_latin_ext": "assets/newsreader_italic_latin_ext.woff2",
+    "kepenk_city_1_v4": "assets/kepenk_city_1_v4.webp",
+    "kepenk_city_2_v4": "assets/kepenk_city_2_v4.webp",
+    "kepenk_city_3_v4": "assets/kepenk_city_3_v4.webp",
+    "kepenk_closing_1_v4": "assets/kepenk_closing_1_v4.webp",
+    "kepenk_closing_2_v4": "assets/kepenk_closing_2_v4.webp",
+    "kepenk_closing_3_v4": "assets/kepenk_closing_3_v4.webp",
+    "kepenk_origin_v2": "assets/kepenk_origin_v2.webp",
+    "kepenk_rescue_v2": "assets/kepenk_rescue_v2.webp",
+    "kepenk_rube_goldberg_v2": "assets/kepenk_rube_goldberg_v2.webp"
+  },
+  "color_schemes": {
+    "Chorus · Gece": {
+      "primary": "f3eee4",
+      "secondary": "171716",
+      "tertiary": "f45139",
+      "quaternary": "e3ff45",
+      "header_background": "171716",
+      "header_primary": "f3eee4",
+      "highlight": "e3ff45",
+      "selected": "2c2b28",
+      "hover": "232220",
+      "danger": "f2496a",
+      "success": "3dbe7a",
+      "love": "e3ff45",
+      "primary-very-low": "1d1c1a",
+      "primary-low": "3a3936",
+      "primary-low-mid": "6f6d68",
+      "primary-medium": "8a857a",
+      "primary-high": "b7b1a3",
+      "primary-very-high": "d8d2c4",
+      "primary-50": "1d1c1a",
+      "primary-100": "211f1d",
+      "primary-200": "2d2c2b",
+      "primary-300": "4a4844",
+      "primary-400": "6f6d68",
+      "primary-500": "85827d",
+      "primary-600": "8a857a",
+      "primary-700": "a4a19a",
+      "primary-800": "b7b1a3",
+      "primary-900": "d8d2c4"
+    }
+  },
+  "modifiers": {
+    "svg_icons": [
+      "headphones",
+      "fab-reddit",
+      "clock",
+      "list-ol"
+    ],
+    "only_theme_color_schemes": true
+  },
+  "learn_more": "https://meta.discourse.org/t/beginners-guide-to-using-discourse-themes/91966"
+}

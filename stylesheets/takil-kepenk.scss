@@ -1,0 +1,127 @@
+// Takıl Kepenk bileşeninden (common)
+/* Chorus · Takıl Kepenk
+   Menüde Takıl'ın yanında Kepenk'in yüzü. Normalde yarı uykulu ve hınzır;
+   Takıl'da senin için yeni bir şey varsa kulaklarını diker, ara ara göz kırpar. */
+
+.chorus-takil-li {
+  display: flex;
+  align-items: center;
+}
+
+.chorus-takil {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.25em 0.55em;
+  color: var(--primary-high);
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+}
+
+/* Ziyaret edilmiş link rengi (temadaki domates) menüde bağırmasın */
+.d-header .chorus-takil,
+.d-header .chorus-takil:visited {
+  color: var(--primary-high);
+}
+
+.d-header .chorus-takil:hover,
+.d-header .chorus-takil:focus-visible {
+  color: var(--primary);
+}
+
+.kepenk-yuz {
+  width: 26px;
+  height: 26px;
+  flex: none;
+  overflow: visible;
+}
+
+.kepenk-yuz .k-kulak {
+  transition: transform 0.25s ease;
+}
+.kepenk-yuz .k-kulak--sol {
+  transform-origin: 7.5px 9px;
+}
+.kepenk-yuz .k-kulak--sag {
+  transform-origin: 16.5px 9px;
+}
+.kepenk-yuz .k-acik,
+.kepenk-yuz .k-kirp {
+  opacity: 0;
+}
+
+/* Uyanık (yeni bir şey var) ve üzerine gelince: kulaklar dik, gözler açık */
+.chorus-takil.is-uyanik .k-kulak--sol,
+.chorus-takil:hover .k-kulak--sol,
+.chorus-takil:focus-visible .k-kulak--sol {
+  transform: translateY(-1px) rotate(-7deg);
+}
+.chorus-takil.is-uyanik .k-kulak--sag,
+.chorus-takil:hover .k-kulak--sag,
+.chorus-takil:focus-visible .k-kulak--sag {
+  transform: translateY(-1px) rotate(7deg);
+}
+.chorus-takil.is-uyanik .k-uykulu,
+.chorus-takil:hover .k-uykulu,
+.chorus-takil:focus-visible .k-uykulu {
+  opacity: 0;
+}
+.chorus-takil.is-uyanik .k-acik,
+.chorus-takil:hover .k-acik,
+.chorus-takil:focus-visible .k-acik {
+  opacity: 1;
+}
+
+/* Üzerine gelince tek göz kırpar */
+.chorus-takil:hover .k-acik-sag,
+.chorus-takil:focus-visible .k-acik-sag {
+  opacity: 0;
+}
+.chorus-takil:hover .k-kirp,
+.chorus-takil:focus-visible .k-kirp {
+  opacity: 1;
+}
+
+/* Uyanıkken ara ara göz kırpar, sol kulağını oynatır */
+@media (prefers-reduced-motion: no-preference) {
+  .chorus-takil.is-uyanik:not(:hover) .k-acik-sag {
+    animation: kepenk-goz 4.8s infinite;
+  }
+  .chorus-takil.is-uyanik:not(:hover) .k-kirp {
+    animation: kepenk-kirp 4.8s infinite;
+  }
+  .chorus-takil.is-uyanik:not(:hover) .k-kulak--sol {
+    animation: kepenk-kulak 4.8s infinite;
+  }
+}
+
+/* Hareket istemeyenlere sabit göz kırpma */
+@media (prefers-reduced-motion: reduce) {
+  .chorus-takil.is-uyanik .k-acik-sag {
+    opacity: 0;
+  }
+  .chorus-takil.is-uyanik .k-kirp {
+    opacity: 1;
+  }
+}
+
+@keyframes kepenk-goz {
+  0%, 84%, 94%, 100% { opacity: 1; }
+  86%, 92% { opacity: 0; }
+}
+@keyframes kepenk-kirp {
+  0%, 84%, 94%, 100% { opacity: 0; }
+  86%, 92% { opacity: 1; }
+}
+@keyframes kepenk-kulak {
+  0%, 66%, 78%, 100% { transform: translateY(-1px) rotate(-7deg); }
+  70% { transform: translateY(-1.5px) rotate(-17deg); }
+  74% { transform: translateY(-1px) rotate(-3deg); }
+}
+
+@media (max-width: 380px) {
+  .chorus-takil__ad {
+    display: none;
+  }
+}

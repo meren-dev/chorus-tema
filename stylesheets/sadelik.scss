@@ -1,0 +1,36 @@
+// Sadelik bileşeninden (common)
+/* Chorus · Sadelik
+   Karmaşayı azaltan küçük dokunuşlar. Hepsi CSS; bu bileşen kapatılınca her şey eski haline döner. */
+
+/* Oda sayfaları: üstteki kategori / alt kategori açılır menüleri gizli.
+   Oda girişindeki düğmeler aynı işi görüyor. */
+body.chorus-oda-giris-on .category-breadcrumb {
+  display: none;
+}
+
+/* Ana sayfa: "Kapıdan son girenler" en fazla dört kişi gösterir */
+.chorus-vitrin__wall > :nth-child(n + 5) {
+  display: none;
+}
+
+/* Profil: iki "doldur" kutusu yan yana, tek satırda */
+#main-outlet .chorus-profile {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+#main-outlet .chorus-profile > .chorus-profile__fill {
+  flex: 1 1 300px;
+}
+#main-outlet .chorus-profile > :not(.chorus-profile__fill) {
+  flex: 1 1 100%;
+}
+
+/* Profil: Discourse'un istatistik bölümleri gizli; Chorus profili kişiyi zaten anlatıyor.
+   Rozetler kalıyor. */
+.top-section.stats-section,
+.top-section.replies-and-topics-section,
+.top-section.links-and-replied-to-section,
+.top-section.most-liked-section,
+.top-section.top-categories-section {
+  display: none;
+}

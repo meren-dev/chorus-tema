@@ -1,0 +1,637 @@
+// Doku bileşeninden (common)
+/* Chorus · Doku
+   Her blok odasının müzik motifini taşır: Dinle dalga formu, Oku nota kağıdı, Oyna klavye,
+   Takıl miks masası. Oda etiketindeki küçük işaret aynı motif. Sakin hareketler, sol alt köşede
+   eşlik eden Kepenk, Kepenk'li boş arama ekranı. Hareket istemeyenlere her şey sabit kalır. */
+
+/* ---------- Blok aralığı ---------- */
+body .chorus-vitrin.is-member {
+  gap: 28px;
+}
+
+/* ---------- Oda etiketi: odanın küçük işareti + oda adı ---------- */
+.chorus-vitrin .chorus-radyo::before,
+.chorus-vitrin .chorus-bugun::before,
+.chorus-vitrin .chorus-takilda::before,
+.chorus-vitrin .chorus-vitrin__block:has(> .chorus-vitrin__moments)::before,
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall)::before,
+.chorus-vitrin .chorus-vitrin__block:not(.chorus-radyo):has(> .chorus-vitrin__secki)::before {
+  display: block;
+  margin-bottom: 14px;
+  padding-left: 24px;
+  font-family: var(--chorus-mono, "IBM Plex Mono", monospace);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  line-height: 12px;
+  text-transform: uppercase;
+  color: var(--primary-medium);
+  background-size: 16px 12px;
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+.chorus-vitrin .chorus-radyo::before {
+  content: "Dinle · Radyo";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'%3E%3Cpath d='M1.5 4.5v3' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M4.5 2.5v7' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M7.5 1v10' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10.5 3v6' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M13.5 5v2' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.chorus-vitrin .chorus-vitrin__block:has(> .chorus-vitrin__moments)::before {
+  content: "Dinle · Saniyeler";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'%3E%3Cpath d='M1.5 4.5v3' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M4.5 2.5v7' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M7.5 1v10' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10.5 3v6' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M13.5 5v2' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.chorus-vitrin .chorus-vitrin__block:not(.chorus-radyo):has(> .chorus-vitrin__secki)::before {
+  content: "Dinle · Seçki";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'%3E%3Cpath d='M1.5 4.5v3' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M4.5 2.5v7' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M7.5 1v10' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10.5 3v6' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M13.5 5v2' stroke='%23E3FF45' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+.chorus-vitrin .chorus-bugun::before {
+  content: "Oyna · Bugün";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'%3E%3Crect x='0' y='0' width='3.4' height='12' rx='.6' fill='%23F3EEE4' fill-opacity='0.85'/%3E%3Crect x='4' y='0' width='3.4' height='12' rx='.6' fill='%23F3EEE4' fill-opacity='0.85'/%3E%3Crect x='8' y='0' width='3.4' height='12' rx='.6' fill='%232948B1' fill-opacity='1'/%3E%3Crect x='12' y='0' width='3.4' height='12' rx='.6' fill='%23F3EEE4' fill-opacity='0.85'/%3E%3Crect x='2.6' y='0' width='2.2' height='7' fill='%23171716'/%3E%3Crect x='6.6' y='0' width='2.2' height='7' fill='%23171716'/%3E%3Crect x='14.6' y='0' width='2.2' height='7' fill='%23171716'/%3E%3C/svg%3E");
+}
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall)::before {
+  content: "Takıl · Yeni gelenler";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'%3E%3Cpath d='M3 1V11' stroke='%23F3EEE4' stroke-opacity='.6' stroke-width='1'/%3E%3Crect x='1' y='6.5' width='4' height='2.6' rx='.6' fill='%23F3EEE4'/%3E%3Cpath d='M8 1V11' stroke='%23F3EEE4' stroke-opacity='.6' stroke-width='1'/%3E%3Crect x='6' y='2' width='4' height='2.6' rx='.6' fill='%23F45139'/%3E%3Cpath d='M13 1V11' stroke='%23F3EEE4' stroke-opacity='.6' stroke-width='1'/%3E%3Crect x='11' y='5' width='4' height='2.6' rx='.6' fill='%23F3EEE4'/%3E%3C/svg%3E");
+}
+.chorus-vitrin .chorus-takilda::before {
+  content: "Takıl";
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='12' viewBox='0 0 16 12'%3E%3Cpath d='M3 1V11' stroke='%23F3EEE4' stroke-opacity='.6' stroke-width='1'/%3E%3Crect x='1' y='6.5' width='4' height='2.6' rx='.6' fill='%23F3EEE4'/%3E%3Cpath d='M8 1V11' stroke='%23F3EEE4' stroke-opacity='.6' stroke-width='1'/%3E%3Crect x='6' y='2' width='4' height='2.6' rx='.6' fill='%23F45139'/%3E%3Cpath d='M13 1V11' stroke='%23F3EEE4' stroke-opacity='.6' stroke-width='1'/%3E%3Crect x='11' y='5' width='4' height='2.6' rx='.6' fill='%23F3EEE4'/%3E%3C/svg%3E");
+}
+
+/* ---------- Panel: çerçeve + sağda odanın müzik motifi ----------
+   Dinle: dalga formu ve sarı oynatma çizgisi · Oku: nota kağıdı, pembe bir nota
+   Oyna: klavye, basılı kobalt tuş · Takıl: miks masası, domates fader (herkes bir kanal) */
+.chorus-vitrin .chorus-vitrin__block,
+.chorus-oda-giris {
+  position: relative;
+  border: 1px solid var(--primary-low);
+}
+.chorus-vitrin .chorus-vitrin__block {
+  padding: 22px 24px 24px;
+}
+.chorus-oda-giris {
+  max-width: none;
+  padding: 26px 28px 24px;
+}
+.chorus-vitrin .chorus-vitrin__block > *,
+.chorus-oda-giris > * {
+  position: relative;
+  z-index: 1;
+}
+.chorus-vitrin .chorus-vitrin__block::after,
+.chorus-oda-giris::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 46%;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: right 28px center;
+  opacity: 0.75;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 40%);
+  mask-image: linear-gradient(to right, transparent, #000 40%);
+  transition: opacity 0.3s ease;
+}
+.chorus-vitrin .chorus-vitrin__block:hover::after,
+.chorus-oda-giris:hover::after {
+  opacity: 1;
+}
+
+/* Dinle: dalga formu */
+.chorus-vitrin .chorus-radyo::after,
+.chorus-vitrin .chorus-vitrin__block:has(> .chorus-vitrin__moments)::after,
+.chorus-vitrin .chorus-vitrin__block:not(.chorus-radyo):has(> .chorus-vitrin__secki)::after,
+.chorus-oda-giris--dinle::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='64' viewBox='0 0 480 64'%3E%3Cdefs%3E%3Cpath id='w' d='M3 22.6v18.9M7 21.2v21.6M11 16.2v31.6M15 18.2v27.6M19 12.7v38.5M23 12.7v38.6M27 14.7v34.5M31 9.2v45.5M35 14v36M39 9.6v44.8M43 14v36M47 14.4v35.2M51 12.2v39.7M55 10.2v43.7M59 17.7v28.5M63 18.7v26.5M67 18.5v26.9M71 19.8v24.4M75 23.6v16.9M79 26.1v11.9M83 27.9v8.1M87 26.7v10.5M91 24.1v15.7M95 24.2v15.6M99 24v16.1M103 23.7v16.5M107 23.2v17.7M111 22.1v19.9M115 24.6v14.9M119 24.8v14.5M123 26.2v11.7M127 27.9v8.2M131 26.3v11.4M135 25.4v13.2M139 24v16M143 22.1v19.8M147 18.4v27.2M151 18.4v27.2M155 18.1v27.8M159 15.6v32.9M163 16.1v31.7M167 17.3v29.4M171 14.4v35.3M175 16v32M179 19.9v24.1M183 19.8v24.3M187 22.1v19.9M191 23.6v16.8M195 26.7v10.7M199 26.8v10.4M203 22.9v18.1M207 22.9v18.1M211 19.5v25M215 15.2v33.6M219 17.5v28.9M223 13.3v37.4M227 16.2v31.5M231 9.4v45.1M235 8v48M239 9.9v44.2M243 7.4v49.3M247 13.6v36.7M251 11.4v41.2M255 13.8v36.3M259 15.8v32.4M263 18.5v27M267 18.8v26.4M271 21v22.1M275 24.5v15M279 26.2v11.6M283 27.9v8.1M287 26.3v11.4M291 25.1v13.8M295 23.5v16.9M299 23.4v17.2M303 24.6v14.8M307 24.7v14.6M311 25v14.1M315 26.8v10.4M319 27.7v8.5M323 26.9v10.3M327 25.5v13M331 24.1v15.7M335 19.7v24.6M339 20.8v22.3M343 18.7v26.7M347 16.2v31.5M351 11.1v41.9M355 16.7v30.6M359 12.8v38.3M363 11.6v40.7M367 8.8v46.5M371 10v43.9M375 10.9v42.3M379 16.9v30.2M383 17.6v28.9M387 19.8v24.4M391 19.9v24.1M395 22.8v18.4M399 26.8v10.4M403 27.1v9.8M407 24.9v14.2M411 22.9v18.2M415 19.8v24.4M419 17.3v29.4M423 17.9v28.3M427 18.8v26.5M431 14.9v34.3M435 14.9v34.2M439 13.3v37.3M443 10.7v42.5M447 13.8v36.5M451 16.2v31.5M455 17.1v29.8M459 18.6v26.8M463 23v17.9M467 22.1v19.8M471 24.6v14.8' stroke='%23F3EEE4' stroke-width='2' stroke-linecap='round'/%3E%3CclipPath id='c'%3E%3Crect width='194' height='64'/%3E%3C/clipPath%3E%3C/defs%3E%3Cuse href='%23w' opacity='.24'/%3E%3Cuse href='%23w' opacity='.6' clip-path='url(%23c)'/%3E%3Cpath d='M194 4V62' stroke='%23E3FF45' stroke-width='1.5'/%3E%3Crect x='190' y='0' width='8' height='6' rx='1.5' fill='%23E3FF45'/%3E%3C/svg%3E");
+  background-size: auto 64px;
+}
+
+/* Oku: nota kağıdı */
+.chorus-oda-giris--oku::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='128' viewBox='0 0 360 128'%3E%3Cg opacity='.85'%3E%3Cpath d='M0 8.5H360M0 13.5H360M0 18.5H360M0 23.5H360M0 28.5H360M120 8.5V28.5M240 8.5V28.5M359.5 8.5V28.5' stroke='%23F3EEE4' stroke-width='1' opacity='.3'/%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='28' cy='23.5' rx='3.4' ry='2.5' transform='rotate(-20 28 23.5)'/%3E%3Cpath d='M31.1 23.5V8.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='52' cy='18.5' rx='3.4' ry='2.5' transform='rotate(-20 52 18.5)'/%3E%3Cpath d='M55.1 18.5V3.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='76' cy='21' rx='3.4' ry='2.5' transform='rotate(-20 76 21)'/%3E%3Cpath d='M79.1 21V6' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='98' cy='13.5' rx='3.4' ry='2.5' transform='rotate(-20 98 13.5)'/%3E%3Cpath d='M101.1 13.5V-1.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='148' cy='16' rx='3.4' ry='2.5' transform='rotate(-20 148 16)'/%3E%3Cpath d='M151.1 16V1' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F7A8C4'%3E%3Cellipse cx='172' cy='26' rx='3.4' ry='2.5' transform='rotate(-20 172 26)'/%3E%3Cpath d='M175.1 26V11' stroke='%23F7A8C4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='198' cy='21' rx='3.4' ry='2.5' transform='rotate(-20 198 21)'/%3E%3Cpath d='M201.1 21V6' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='268' cy='11' rx='3.4' ry='2.5' transform='rotate(-20 268 11)'/%3E%3Cpath d='M271.1 11V-4' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='292' cy='18.5' rx='3.4' ry='2.5' transform='rotate(-20 292 18.5)'/%3E%3Cpath d='M295.1 18.5V3.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='318' cy='23.5' rx='3.4' ry='2.5' transform='rotate(-20 318 23.5)'/%3E%3Cpath d='M321.1 23.5V8.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cpath d='M0 54.5H360M0 59.5H360M0 64.5H360M0 69.5H360M0 74.5H360M120 54.5V74.5M240 54.5V74.5M359.5 54.5V74.5' stroke='%23F3EEE4' stroke-width='1' opacity='.3'/%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='40' cy='59.5' rx='3.4' ry='2.5' transform='rotate(-20 40 59.5)'/%3E%3Cpath d='M43.1 59.5V44.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='64' cy='67' rx='3.4' ry='2.5' transform='rotate(-20 64 67)'/%3E%3Cpath d='M67.1 67V52' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='150' cy='64.5' rx='3.4' ry='2.5' transform='rotate(-20 150 64.5)'/%3E%3Cpath d='M153.1 64.5V49.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='176' cy='59.5' rx='3.4' ry='2.5' transform='rotate(-20 176 59.5)'/%3E%3Cpath d='M179.1 59.5V44.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='204' cy='54.5' rx='3.4' ry='2.5' transform='rotate(-20 204 54.5)'/%3E%3Cpath d='M207.1 54.5V39.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='280' cy='67' rx='3.4' ry='2.5' transform='rotate(-20 280 67)'/%3E%3Cpath d='M283.1 67V52' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cpath d='M0 100.5H360M0 105.5H360M0 110.5H360M0 115.5H360M0 120.5H360M120 100.5V120.5M240 100.5V120.5M359.5 100.5V120.5' stroke='%23F3EEE4' stroke-width='1' opacity='.3'/%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='60' cy='108' rx='3.4' ry='2.5' transform='rotate(-20 60 108)'/%3E%3Cpath d='M63.1 108V93' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3Cg fill='%23F3EEE4' opacity='.5'%3E%3Cellipse cx='170' cy='115.5' rx='3.4' ry='2.5' transform='rotate(-20 170 115.5)'/%3E%3Cpath d='M173.1 115.5V100.5' stroke='%23F3EEE4' stroke-width='1.1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-size: auto 128px;
+}
+
+/* Oyna: klavye, alttan çıkar */
+.chorus-vitrin .chorus-bugun::after,
+.chorus-oda-giris--oyna::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='224' height='64' viewBox='0 0 224 64'%3E%3Crect x='0.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='16.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='32.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='48.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='64.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='80.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='96.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='112.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='128.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='144.5' y='0' width='15' height='64' rx='1.5' fill='%232948B1' fill-opacity='.95'/%3E%3Crect x='160.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='176.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='192.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='208.5' y='0' width='15' height='64' rx='1.5' fill='%23F3EEE4' fill-opacity='.22'/%3E%3Crect x='11.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='27.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='59.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='75.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='91.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='123.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='139.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='171.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='187.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3Crect x='203.5' y='0' width='9' height='38' rx='1.2' fill='%23171716'/%3E%3C/svg%3E");
+  background-size: auto 64px;
+  background-position: right 28px bottom 0;
+}
+
+/* Takıl: miks masası */
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall)::after,
+.chorus-vitrin .chorus-takilda::after,
+.chorus-oda-giris--takil::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='264' height='80' viewBox='0 0 264 80'%3E%3Cg fill='none' stroke='%23F3EEE4' stroke-width='1.2'%3E%3Cpath d='M6 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M28 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M50 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M72 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M94 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M116 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M138 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M160 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M182 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M204 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M226 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M248 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0' stroke-opacity='.4'/%3E%3Cpath d='M11 9L8.4 5.9M33 9L34.4 5.2M55 9L54.3 5.1M77 9L79.3 5.7M99 9L99 5M121 9L119.3 5.4M143 9L145.8 6.2M165 9L164.7 5M187 9L188 5.1M209 9L206.7 5.7M231 9L232.7 5.4M253 9L253.7 5.1' stroke-opacity='.55' stroke-linecap='round'/%3E%3Cpath d='M11 22V76M33 22V76M55 22V76M77 22V76M99 22V76M121 22V76M143 22V76M165 22V76M187 22V76M209 22V76M231 22V76M253 22V76' stroke-opacity='.24' stroke-width='2' stroke-linecap='round'/%3E%3C/g%3E%3Cpath d='M5 41h12v6h-12zM27 33h12v6h-12zM49 49h12v6h-12zM71 37h12v6h-12zM115 31h12v6h-12zM137 45h12v6h-12zM159 53h12v6h-12zM181 35h12v6h-12zM203 43h12v6h-12zM225 59h12v6h-12zM247 39h12v6h-12z' fill='%23F3EEE4' fill-opacity='.62'/%3E%3Cpath d='M93 57h12v6h-12z' fill='%23F45139'/%3E%3Cpath d='M7 44h8M29 36h8M51 52h8M73 40h8M95 60h8M117 34h8M139 48h8M161 56h8M183 38h8M205 46h8M227 62h8M249 42h8' stroke='%23171716'/%3E%3C/svg%3E");
+  background-size: auto 80px;
+  background-position: right 28px bottom 20px;
+}
+
+/* ---------- Takıl tek panel: önce konuşulanlar, altında kapıdan son girenler ---------- */
+.chorus-vitrin.is-member > .chorus-takilda {
+  order: 1;
+}
+.chorus-vitrin.is-member > .chorus-vitrin__block:has(.chorus-vitrin__wall) {
+  order: 2;
+}
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall) + .chorus-takilda {
+  border-bottom: 0;
+  padding-bottom: 8px;
+}
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall) + .chorus-takilda::after {
+  background-image: none;
+}
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall):has(+ .chorus-takilda) {
+  margin-top: -28px;
+  border-top: 0;
+  padding-top: 0;
+}
+.chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall):has(+ .chorus-takilda)::before {
+  content: "";
+  height: 0;
+  margin: 0 0 22px;
+  padding: 0;
+  border-top: 1px dashed var(--primary-low);
+  background: none;
+}
+
+/* Oda girişi: kapılar sağdaki motifin altına girmesin */
+@media (min-width: 768px) {
+  .chorus-oda-giris .chorus-oda-giris__kapilar,
+  .chorus-oda-giris .chorus-oda-giris__bos {
+    max-width: calc(100% - 400px);
+  }
+}
+
+/* Takıl'da konuşulanlar: son satırın çizgisi çerçeveyle çakışmasın */
+.chorus-takilda__liste li:last-child {
+  border-bottom: 0;
+}
+
+/* Dar ekranda motif küçülür, sağ üst köşeye çekilir (yazının üstüne binmesin) */
+@media (max-width: 767px) {
+  .chorus-vitrin .chorus-vitrin__block::after,
+  .chorus-oda-giris::after {
+    inset: 0 0 auto auto;
+    width: 55%;
+    height: 64px;
+    opacity: 0.6;
+    background-position: right 14px top 16px !important;
+    background-size: auto 30px !important;
+  }
+  .chorus-vitrin .chorus-vitrin__block:has(.chorus-vitrin__wall):has(+ .chorus-takilda)::after {
+    display: none;
+  }
+}
+
+/* ---------- Beşli kolajları: üstüne gelince plak kabı gibi kalkar ---------- */
+.chorus-vitrin__collage {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.chorus-vitrin__collage:hover,
+.chorus-vitrin__collage:focus-visible {
+  transform: translateY(-4px) rotate(-1deg);
+  box-shadow: 6px 6px 0 #2948b1;
+}
+
+/* ---------- Hareket ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .chorus-vitrin > * {
+    animation: chorus-belir 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .chorus-vitrin > :nth-child(2) { animation-delay: 0.06s; }
+  .chorus-vitrin > :nth-child(3) { animation-delay: 0.12s; }
+  .chorus-vitrin > :nth-child(4) { animation-delay: 0.18s; }
+  .chorus-vitrin > :nth-child(5) { animation-delay: 0.24s; }
+  .chorus-vitrin > :nth-child(6) { animation-delay: 0.3s; }
+
+  /* Radyonun canlı noktası nefes alır; müzik çalarken dalga formundaki sarı çizgi ilerler */
+  .chorus-radyo__dot {
+    animation: chorus-canli 2.6s ease-out infinite;
+  }
+  body:has(.chorus-mini.is-playing) .chorus-vitrin .chorus-radyo::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='64' viewBox='0 0 480 64'%3E%3Cdefs%3E%3Cpath id='w' d='M3 22.6v18.9M7 21.2v21.6M11 16.2v31.6M15 18.2v27.6M19 12.7v38.5M23 12.7v38.6M27 14.7v34.5M31 9.2v45.5M35 14v36M39 9.6v44.8M43 14v36M47 14.4v35.2M51 12.2v39.7M55 10.2v43.7M59 17.7v28.5M63 18.7v26.5M67 18.5v26.9M71 19.8v24.4M75 23.6v16.9M79 26.1v11.9M83 27.9v8.1M87 26.7v10.5M91 24.1v15.7M95 24.2v15.6M99 24v16.1M103 23.7v16.5M107 23.2v17.7M111 22.1v19.9M115 24.6v14.9M119 24.8v14.5M123 26.2v11.7M127 27.9v8.2M131 26.3v11.4M135 25.4v13.2M139 24v16M143 22.1v19.8M147 18.4v27.2M151 18.4v27.2M155 18.1v27.8M159 15.6v32.9M163 16.1v31.7M167 17.3v29.4M171 14.4v35.3M175 16v32M179 19.9v24.1M183 19.8v24.3M187 22.1v19.9M191 23.6v16.8M195 26.7v10.7M199 26.8v10.4M203 22.9v18.1M207 22.9v18.1M211 19.5v25M215 15.2v33.6M219 17.5v28.9M223 13.3v37.4M227 16.2v31.5M231 9.4v45.1M235 8v48M239 9.9v44.2M243 7.4v49.3M247 13.6v36.7M251 11.4v41.2M255 13.8v36.3M259 15.8v32.4M263 18.5v27M267 18.8v26.4M271 21v22.1M275 24.5v15M279 26.2v11.6M283 27.9v8.1M287 26.3v11.4M291 25.1v13.8M295 23.5v16.9M299 23.4v17.2M303 24.6v14.8M307 24.7v14.6M311 25v14.1M315 26.8v10.4M319 27.7v8.5M323 26.9v10.3M327 25.5v13M331 24.1v15.7M335 19.7v24.6M339 20.8v22.3M343 18.7v26.7M347 16.2v31.5M351 11.1v41.9M355 16.7v30.6M359 12.8v38.3M363 11.6v40.7M367 8.8v46.5M371 10v43.9M375 10.9v42.3M379 16.9v30.2M383 17.6v28.9M387 19.8v24.4M391 19.9v24.1M395 22.8v18.4M399 26.8v10.4M403 27.1v9.8M407 24.9v14.2M411 22.9v18.2M415 19.8v24.4M419 17.3v29.4M423 17.9v28.3M427 18.8v26.5M431 14.9v34.3M435 14.9v34.2M439 13.3v37.3M443 10.7v42.5M447 13.8v36.5M451 16.2v31.5M455 17.1v29.8M459 18.6v26.8M463 23v17.9M467 22.1v19.8M471 24.6v14.8' stroke='%23F3EEE4' stroke-width='2' stroke-linecap='round'/%3E%3CclipPath id='c'%3E%3Crect width='194' height='64'%3E%3Canimate attributeName='width' from='194' to='476' dur='40s' repeatCount='indefinite'/%3E%3C/rect%3E%3C/clipPath%3E%3C/defs%3E%3Cuse href='%23w' opacity='.24'/%3E%3Cuse href='%23w' opacity='.6' clip-path='url(%23c)'/%3E%3Cg%3E%3CanimateTransform attributeName='transform' type='translate' from='0 0' to='282 0' dur='40s' repeatCount='indefinite'/%3E%3Cpath d='M194 4V62' stroke='%23E3FF45' stroke-width='1.5'/%3E%3Crect x='190' y='0' width='8' height='6' rx='1.5' fill='%23E3FF45'/%3E%3C/g%3E%3C/svg%3E");
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chorus-vitrin .chorus-vitrin__block::after,
+  .chorus-oda-giris::after,
+  .chorus-vitrin__collage {
+    transition: none;
+  }
+}
+
+@keyframes chorus-belir {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes chorus-canli {
+  0% { box-shadow: 0 0 0 0 rgba(244, 81, 57, 0.55); }
+  70% { box-shadow: 0 0 0 9px rgba(244, 81, 57, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(244, 81, 57, 0); }
+}
+
+/* ---------- Köşedeki Kepenk ---------- */
+.kepenk-kose {
+  position: fixed;
+  left: 20px;
+  bottom: 0;
+  z-index: 400;
+}
+.kepenk-kose__dugme {
+  display: block;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transform: translateY(34%);
+  transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  filter: drop-shadow(0 -2px 6px rgba(0, 0, 0, 0.35));
+}
+.kepenk-kose__dugme:focus-visible {
+  outline: 2px solid #e3ff45;
+  outline-offset: 2px;
+}
+.kepenk-kose .kepenk-yuz {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.kepenk-kose .k-acik,
+.kepenk-kose .k-kapali,
+.kepenk-kose .k-mutlu,
+.kepenk-kose .k-kulaklik {
+  opacity: 0;
+}
+.kepenk-kose .k-kulaklik {
+  transition: opacity 0.3s ease;
+}
+.kepenk-kose .k-kulak--sol { transform-origin: 7.5px 9px; }
+.kepenk-kose .k-kulak--sag { transform-origin: 16.5px 9px; }
+
+/* Üzerine gelince ya da konuşurken: başını kaldırır, merakla bakar */
+.kepenk-kose__dugme:hover,
+.kepenk-kose__dugme:focus-visible {
+  transform: translateY(18%);
+}
+.kepenk-kose__dugme:hover .k-uykulu,
+.kepenk-kose__dugme:focus-visible .k-uykulu,
+.kepenk-kose.is-konusuyor .k-uykulu,
+.kepenk-kose__dugme:hover .k-kapali,
+.kepenk-kose__dugme:focus-visible .k-kapali,
+.kepenk-kose.is-konusuyor .k-kapali {
+  opacity: 0;
+  animation: none;
+}
+.kepenk-kose__dugme:hover .k-acik,
+.kepenk-kose__dugme:focus-visible .k-acik,
+.kepenk-kose.is-konusuyor .k-acik {
+  opacity: 1;
+}
+
+/* Müzik çalarken: sarı kulaklık, mutlu gözler, biraz daha yukarıda */
+body:has(.chorus-mini.is-playing) .kepenk-kose__dugme {
+  transform: translateY(14%);
+}
+body:has(.chorus-mini.is-playing) .kepenk-kose .k-uykulu,
+body:has(.chorus-mini.is-playing) .kepenk-kose .k-acik,
+body:has(.chorus-mini.is-playing) .kepenk-kose .k-kapali {
+  opacity: 0;
+  animation: none;
+}
+body:has(.chorus-mini.is-playing) .kepenk-kose .k-mutlu,
+body:has(.chorus-mini.is-playing) .kepenk-kose .k-kulaklik {
+  opacity: 1;
+}
+body .kepenk-kose.is-konusuyor .kepenk-kose__dugme {
+  transform: translateY(8%);
+}
+
+/* Konuşma balonu */
+.kepenk-balon {
+  position: absolute;
+  left: 4px;
+  bottom: 60px;
+  width: max-content;
+  max-width: 260px;
+  padding: 12px 30px 12px 14px;
+  background: #f3eee4;
+  color: #171716;
+  border: 1px solid #171716;
+  box-shadow: 5px 5px 0 #2948b1;
+}
+.kepenk-balon::after {
+  content: "";
+  position: absolute;
+  left: 22px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  background: #f3eee4;
+  border-right: 1px solid #171716;
+  border-bottom: 1px solid #171716;
+  transform: rotate(45deg);
+}
+.kepenk-balon p {
+  margin: 0;
+  font-family: var(--chorus-serif, "Newsreader", serif);
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.3;
+}
+.kepenk-balon a,
+.kepenk-balon a:visited {
+  display: inline-block;
+  margin-top: 8px;
+  font-family: var(--chorus-mono, "IBM Plex Mono", monospace);
+  font-size: 12px;
+  color: #c43c26;
+  text-decoration: none;
+}
+.kepenk-balon__kapat {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  color: #6b675f;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Kendi kendine: arada bir yavaşça göz kırpar, kulağını oynatır; müzik çalınca başını sallar */
+@media (prefers-reduced-motion: no-preference) {
+  .kepenk-kose .k-uykulu { animation: kose-uyku 9s linear infinite; }
+  .kepenk-kose .k-kapali { animation: kose-kapali 9s linear infinite; }
+  .kepenk-kose .k-kulak--sol { animation: kose-kulak 23s ease-in-out infinite; }
+  body:has(.chorus-mini.is-playing) .kepenk-kose .kepenk-yuz {
+    transform-origin: 50% 92%;
+    animation: kose-sallan 0.62s ease-in-out infinite alternate;
+  }
+  .kepenk-balon { animation: balon-ac 0.18s ease-out both; }
+}
+@keyframes kose-uyku {
+  0%, 95%, 99%, 100% { opacity: 1; }
+  96%, 98% { opacity: 0; }
+}
+@keyframes kose-kapali {
+  0%, 95%, 99%, 100% { opacity: 0; }
+  96%, 98% { opacity: 1; }
+}
+@keyframes kose-kulak {
+  0%, 90%, 96%, 100% { transform: none; }
+  92% { transform: rotate(-14deg); }
+  94% { transform: rotate(-4deg); }
+}
+@keyframes kose-sallan {
+  from { transform: rotate(-4deg); }
+  to { transform: rotate(4deg); }
+}
+@keyframes balon-ac {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Kalabalık yapmasın: dar ekranlarda, yazarken, tam sayfa sohbette ve pencerelerde görünmez */
+@media (max-width: 1279px) {
+  .kepenk-kose { display: none; }
+}
+body.has-full-page-chat .kepenk-kose,
+body:has(#reply-control.open) .kepenk-kose,
+body:has(.d-modal) .kepenk-kose {
+  display: none;
+}
+
+/* ---------- Boş arama ---------- */
+.kepenk-arama {
+  display: none;
+  position: relative;
+  gap: 22px;
+  align-items: flex-start;
+  margin: 24px 0;
+  padding: 26px 28px;
+  border: 1px solid var(--primary-low);
+}
+.kepenk-arama::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 55%;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='64' viewBox='0 0 480 64'%3E%3Cpath d='M3 31v2M7 31v2M11 31v2M15 31v2M19 31v2M23 31v2M27 31v2M31 31v2M35 31v2M39 31v2M43 31v2M47 31v2M51 31v2M55 31v2M59 31v2M63 31v2M67 31v2M71 31v2M75 31v2M79 31v2M83 31v2M87 31v2M91 31v2M95 31v2M99 31v2M103 31v2M107 31v2M111 31v2M115 31v2M119 31v2M123 31v2M127 31v2M131 31v2M135 31v2M139 31v2M143 31v2M147 31v2M151 31v2M155 31v2M159 31v2M163 31v2M167 31v2M171 31v2M175 31v2M179 31v2M183 31v2M187 31v2M191 31v2M195 31v2M199 31v2M203 31v2M207 31v2M211 31v2M215 31v2M219 31v2M223 31v2M227 31v2M231 31v2M235 31v2M239 31v2M243 31v2M247 31v2M251 31v2M255 31v2M259 31v2M263 31v2M267 31v2M271 31v2M275 31v2M279 31v2M283 30v4M287 27.5v9M291 29v6M295 30.5v3M299 31v2M303 31v2M307 31v2M311 31v2M315 31v2M319 31v2M323 31v2M327 31v2M331 31v2M335 31v2M339 31v2M343 31v2M347 31v2M351 31v2M355 31v2M359 31v2M363 31v2M367 31v2M371 31v2M375 31v2M379 31v2M383 31v2M387 31v2M391 31v2M395 31v2M399 31v2M403 31v2M407 31v2M411 31v2M415 31v2M419 31v2M423 31v2M427 31v2M431 31v2M435 31v2M439 31v2M443 31v2M447 31v2M451 31v2M455 31v2M459 31v2M463 31v2M467 31v2M471 31v2' stroke='%23F3EEE4' stroke-width='2' stroke-linecap='round' opacity='.3'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 28px bottom 14px;
+  background-size: auto 40px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 45%);
+  mask-image: linear-gradient(to right, transparent, #000 45%);
+}
+.kepenk-arama > * {
+  position: relative;
+  z-index: 1;
+}
+body:has(.search-container .no-results-container) .kepenk-arama {
+  display: flex;
+}
+body:has(.kepenk-arama) .search-container .no-results-container {
+  display: none;
+}
+.kepenk-arama__yuz {
+  flex: none;
+  width: 64px;
+  height: 64px;
+  transform: rotate(-8deg);
+}
+.kepenk-arama__baslik {
+  margin: 0 0 0.3em;
+  font-family: var(--chorus-serif, "Newsreader", serif);
+  font-style: italic;
+  font-size: var(--font-up-3);
+  line-height: 1.2;
+  color: var(--primary);
+}
+.kepenk-arama__alt {
+  margin: 0 0 1em;
+  color: var(--primary-high);
+}
+.kepenk-arama__kapilar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+/* Üstteki hızlı aramada sonuç yoksa: küçük Kepenk */
+.search-menu .no-results,
+.search-menu-container .no-results {
+  padding-left: 34px;
+  background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%3Cg%20fill%3D%22%23F3EEE4%22%20stroke%3D%22%23F45139%22%20stroke-width%3D%221.9%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4.2%2011.4%20L5.2%203%20L10.9%207.3%20Z%22%2F%3E%3Cpath%20d%3D%22M19.8%2011.4%20L18.8%203%20L13.1%207.3%20Z%22%2F%3E%3Cellipse%20cx%3D%2212%22%20cy%3D%2213.9%22%20rx%3D%228.7%22%20ry%3D%227.5%22%2F%3E%3C%2Fg%3E%3Ccircle%20cx%3D%228.4%22%20cy%3D%2212.9%22%20r%3D%221.45%22%20fill%3D%22%231b1b1a%22%2F%3E%3Ccircle%20cx%3D%2215.6%22%20cy%3D%2212.9%22%20r%3D%221.45%22%20fill%3D%22%231b1b1a%22%2F%3E%3Cpath%20d%3D%22M11%2017.2q1-.6%202%200%22%20stroke%3D%22%231b1b1a%22%20stroke-width%3D%221.2%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E") 6px center / 22px 22px no-repeat;
+}
+
+/* ---------- Ek ayarlar ---------- */
+/* Oda girişi: alttaki konu listesiyle aynı genişlikte */
+body .chorus-oda-giris {
+  max-width: none;
+}
+.chorus-oda-giris__alt {
+  max-width: 62ch;
+}
+
+/* Boş arama: arama kutusuyla aynı hizada */
+.kepenk-arama {
+  margin: 24px 10%;
+}
+@media (max-width: 767px) {
+  .kepenk-arama {
+    margin: 16px 0;
+    padding: 20px;
+    gap: 14px;
+  }
+  .kepenk-arama__yuz {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Profil: dolu kutuların boş köşesinde odasının motifi (Beşli → beş kanallı mikser, Durduğu anlar → dalga formu) */
+.chorus-profile__block:has(> .chorus-profile__besli),
+.chorus-profile__block:has(> .chorus-profile__moment) {
+  position: relative;
+}
+.chorus-profile__block:has(> .chorus-profile__besli) > *,
+.chorus-profile__block:has(> .chorus-profile__moment) > * {
+  position: relative;
+  z-index: 1;
+}
+.chorus-profile__block:has(> .chorus-profile__besli)::after,
+.chorus-profile__block:has(> .chorus-profile__moment)::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 auto;
+  width: 70%;
+  height: 96px;
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: right 16px bottom 16px;
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 50%);
+  mask-image: linear-gradient(to right, transparent, #000 50%);
+}
+.chorus-profile__block:has(> .chorus-profile__besli)::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='80' viewBox='0 0 110 80'%3E%3Cg fill='none' stroke='%23F3EEE4' stroke-width='1.2'%3E%3Cpath d='M6 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M28 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M50 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M72 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0M94 9a5 5 0 1 0 10 0a5 5 0 1 0-10 0' stroke-opacity='.4'/%3E%3Cpath d='M11 9L9 5.5M33 9L34 5.1M55 9L55 5M77 9L79 5.5M99 9L98 5.1' stroke-opacity='.55' stroke-linecap='round'/%3E%3Cpath d='M11 22V76M33 22V76M55 22V76M77 22V76M99 22V76' stroke-opacity='.24' stroke-width='2' stroke-linecap='round'/%3E%3C/g%3E%3Cpath d='M5 43h12v6h-12zM27 31h12v6h-12zM71 37h12v6h-12zM93 47h12v6h-12z' fill='%23F3EEE4' fill-opacity='.62'/%3E%3Cpath d='M49 53h12v6h-12z' fill='%23F45139'/%3E%3Cpath d='M7 46h8M29 34h8M51 56h8M73 40h8M95 50h8' stroke='%23171716'/%3E%3C/svg%3E");
+  background-size: auto 64px;
+}
+.chorus-profile__block:has(> .chorus-profile__moment)::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='64' viewBox='0 0 480 64'%3E%3Cdefs%3E%3Cpath id='w' d='M3 22.6v18.9M7 21.2v21.6M11 16.2v31.6M15 18.2v27.6M19 12.7v38.5M23 12.7v38.6M27 14.7v34.5M31 9.2v45.5M35 14v36M39 9.6v44.8M43 14v36M47 14.4v35.2M51 12.2v39.7M55 10.2v43.7M59 17.7v28.5M63 18.7v26.5M67 18.5v26.9M71 19.8v24.4M75 23.6v16.9M79 26.1v11.9M83 27.9v8.1M87 26.7v10.5M91 24.1v15.7M95 24.2v15.6M99 24v16.1M103 23.7v16.5M107 23.2v17.7M111 22.1v19.9M115 24.6v14.9M119 24.8v14.5M123 26.2v11.7M127 27.9v8.2M131 26.3v11.4M135 25.4v13.2M139 24v16M143 22.1v19.8M147 18.4v27.2M151 18.4v27.2M155 18.1v27.8M159 15.6v32.9M163 16.1v31.7M167 17.3v29.4M171 14.4v35.3M175 16v32M179 19.9v24.1M183 19.8v24.3M187 22.1v19.9M191 23.6v16.8M195 26.7v10.7M199 26.8v10.4M203 22.9v18.1M207 22.9v18.1M211 19.5v25M215 15.2v33.6M219 17.5v28.9M223 13.3v37.4M227 16.2v31.5M231 9.4v45.1M235 8v48M239 9.9v44.2M243 7.4v49.3M247 13.6v36.7M251 11.4v41.2M255 13.8v36.3M259 15.8v32.4M263 18.5v27M267 18.8v26.4M271 21v22.1M275 24.5v15M279 26.2v11.6M283 27.9v8.1M287 26.3v11.4M291 25.1v13.8M295 23.5v16.9M299 23.4v17.2M303 24.6v14.8M307 24.7v14.6M311 25v14.1M315 26.8v10.4M319 27.7v8.5M323 26.9v10.3M327 25.5v13M331 24.1v15.7M335 19.7v24.6M339 20.8v22.3M343 18.7v26.7M347 16.2v31.5M351 11.1v41.9M355 16.7v30.6M359 12.8v38.3M363 11.6v40.7M367 8.8v46.5M371 10v43.9M375 10.9v42.3M379 16.9v30.2M383 17.6v28.9M387 19.8v24.4M391 19.9v24.1M395 22.8v18.4M399 26.8v10.4M403 27.1v9.8M407 24.9v14.2M411 22.9v18.2M415 19.8v24.4M419 17.3v29.4M423 17.9v28.3M427 18.8v26.5M431 14.9v34.3M435 14.9v34.2M439 13.3v37.3M443 10.7v42.5M447 13.8v36.5M451 16.2v31.5M455 17.1v29.8M459 18.6v26.8M463 23v17.9M467 22.1v19.8M471 24.6v14.8' stroke='%23F3EEE4' stroke-width='2' stroke-linecap='round'/%3E%3CclipPath id='c'%3E%3Crect width='194' height='64'/%3E%3C/clipPath%3E%3C/defs%3E%3Cuse href='%23w' opacity='.24'/%3E%3Cuse href='%23w' opacity='.6' clip-path='url(%23c)'/%3E%3Cpath d='M194 4V62' stroke='%23E3FF45' stroke-width='1.5'/%3E%3Crect x='190' y='0' width='8' height='6' rx='1.5' fill='%23E3FF45'/%3E%3C/svg%3E");
+  background-size: auto 40px;
+}
+
+/* Beşli kutusu dolu; motif yazının üstüne binmesin */
+.chorus-profile__block:has(> .chorus-profile__besli)::after {
+  display: none;
+}
+
+/* ---------- Kepenk'ten haber: beşli eşleşmesi ---------- */
+/* Köşede: başını kaldırır, kulağının yanında sarı bir nokta yanar */
+.kepenk-kose__dugme {
+  position: relative;
+}
+.kepenk-kose__nokta {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #e3ff45;
+  box-shadow: 0 0 0 2px #171716;
+  opacity: 0;
+  transform: scale(0.4);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.kepenk-kose.has-haber .kepenk-kose__nokta {
+  opacity: 1;
+  transform: none;
+}
+.kepenk-kose.has-haber .kepenk-kose__dugme {
+  transform: translateY(16%);
+}
+.kepenk-kose.has-haber .k-uykulu,
+.kepenk-kose.has-haber .k-kapali {
+  opacity: 0;
+  animation: none;
+}
+.kepenk-kose.has-haber .k-acik {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .kepenk-kose.has-haber .kepenk-kose__nokta {
+    animation: kepenk-haber-nabiz 2.4s ease-out infinite;
+  }
+}
+@keyframes kepenk-haber-nabiz {
+  0% { box-shadow: 0 0 0 2px #171716, 0 0 0 2px rgba(227, 255, 69, 0.6); }
+  70% { box-shadow: 0 0 0 2px #171716, 0 0 0 9px rgba(227, 255, 69, 0); }
+  100% { box-shadow: 0 0 0 2px #171716, 0 0 0 2px rgba(227, 255, 69, 0); }
+}
+
+/* Ana sayfada: Kepenk'in bıraktığı not (balonla aynı dil) */
+.chorus-vitrin .chorus-vitrin__block.kepenk-haber {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 48px 14px 16px;
+  border: 1px solid #171716;
+  background: #f3eee4;
+  color: #171716;
+  box-shadow: 5px 5px 0 #2948b1;
+}
+.chorus-vitrin .chorus-vitrin__block.kepenk-haber::after {
+  content: none;
+}
+.kepenk-haber__yuz {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  transform: rotate(-6deg);
+}
+.kepenk-haber__kim {
+  display: block;
+  margin-bottom: 2px;
+  color: #6b675f;
+  font-family: var(--chorus-mono, "IBM Plex Mono", monospace);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.kepenk-haber__metin p {
+  margin: 0;
+  color: #171716;
+  font-family: var(--chorus-serif, "Newsreader", serif);
+  font-size: 18px;
+  font-style: italic;
+  line-height: 1.3;
+}
+.kepenk-haber__metin a,
+.kepenk-haber__metin a:visited {
+  display: inline-block;
+  margin-top: 6px;
+  color: #c43c26;
+  font-family: var(--chorus-mono, "IBM Plex Mono", monospace);
+  font-size: 12px;
+  text-decoration: none;
+}
+.chorus-vitrin .kepenk-haber__kapat {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 2px 6px;
+  border: 0;
+  background: none;
+  color: #6b675f;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}

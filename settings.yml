@@ -1,0 +1,54 @@
+
+# --- Doku bileşeninden ---
+takil_kategori:
+  type: integer
+  default: 17
+  description: "Takıl kategorisi (boş aramadaki 'Takıl'da sor' bağlantısı)"
+dinle_kategori:
+  type: integer
+  default: 14
+  description: "Dinle kategorisi (boş aramadaki 'Listelere göz at' bağlantısı)"
+
+# --- Odalar bileşeninden ---
+oda_dinle:
+  type: integer
+  default: 14
+  description: "Dinle odasının kategori numarası"
+oda_oku:
+  type: integer
+  default: 15
+  description: "Oku odasının kategori numarası"
+oda_oyna:
+  type: integer
+  default: 16
+  description: "Oyna odasının kategori numarası"
+oda_takil:
+  type: integer
+  default: 17
+  description: "Takıl odasının kategori numarası"
+gunun_sorusu:
+  type: integer
+  default: 19
+  description: "Ana sayfadaki Bugün bloğu bu kategorideki son soruyu gösterir"
+besliler:
+  type: integer
+  default: 9
+  description: "Takıl'da konuşulanlar listesine girmeyen Beşliler kategorisi"
+kor_dinleme:
+  type: integer
+  default: 11
+  description: "Bugün bloğundaki Kör Dinleme kategorisi"
+dort_dortluk:
+  type: integer
+  default: 20
+  description: "Bugün bloğundaki Dört Dörtlük kategorisi"
+
+# --- Takıl Kepenk bileşeninden ---
+takil_adresi:
+  default: "/c/acik-masalar/7"
+  description: "Takıl'a tıklayınca açılacak sayfa"
+takil_kategorileri:
+  type: list
+  list_type: category
+  default: "5|9|6|7"
+  description: "Bu kategorilerde okumadığın yeni bir şey olunca Kepenk uyanır"

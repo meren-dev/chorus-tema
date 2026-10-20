@@ -1,0 +1,367 @@
+// Odalar bileşeninden (common)
+/* Chorus · Odalar
+   Dört oda: Dinle · Oku · Oyna · Takıl. Menü, bulunduğun odanın işareti,
+   oda sayfası girişi ve ana sayfanın yeni düzeni. */
+
+/* ---------- Menü (masaüstü, header) ---------- */
+.chorus-odalar-li {
+  display: flex;
+  align-items: center;
+}
+
+.chorus-odalar {
+  display: flex;
+  align-items: center;
+  gap: 0.15em;
+  margin-right: 0.1em;
+}
+
+.d-header .chorus-oda,
+.d-header .chorus-oda:visited,
+.chorus-oda-serit .chorus-oda,
+.chorus-oda-serit .chorus-oda:visited {
+  color: var(--primary-high);
+  font-weight: 600;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.d-header .chorus-oda {
+  padding: 0.45em 0.55em;
+}
+
+.d-header .chorus-oda:hover,
+.d-header .chorus-oda:focus-visible,
+.chorus-oda-serit .chorus-oda:hover {
+  color: var(--primary);
+}
+
+/* Bulunduğun oda: parlak yazı + altında sarı çizgi */
+body.chorus-oda-dinle .chorus-oda--dinle,
+body.chorus-oda-oku .chorus-oda--oku,
+body.chorus-oda-oyna .chorus-oda--oyna,
+body.chorus-oda-takil .chorus-oda--takil,
+body.chorus-oda-takil .d-header .chorus-takil {
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-color: #e3ff45;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+body.chorus-oda-takil .d-header .chorus-takil {
+  text-decoration: none;
+}
+body.chorus-oda-takil .d-header .chorus-takil .chorus-takil__ad {
+  text-decoration: underline;
+  text-decoration-color: #e3ff45;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+
+/* ---------- Menü (mobil, header'ın altında şerit) ---------- */
+.chorus-oda-serit {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .chorus-odalar-li {
+    display: none;
+  }
+
+  .chorus-oda-serit {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.25em;
+    padding: 0 16px;
+    background: var(--header_background, #171716);
+    border-bottom: 1px solid var(--primary-low);
+    position: sticky;
+    top: var(--header-offset, 0);
+    z-index: 2;
+  }
+
+  .chorus-oda-serit .chorus-oda {
+    flex: 1;
+    text-align: center;
+    padding: 0.8em 0 0.7em;
+    font-size: var(--font-0);
+  }
+}
+
+/* ---------- Oda sayfası girişi ---------- */
+.chorus-oda-giris {
+  max-width: 760px;
+  margin: 1.6em 0 1.4em;
+}
+
+.chorus-oda-giris h1 {
+  margin: 0 0 0.25em;
+  font-size: var(--font-up-5);
+  line-height: 1.05;
+}
+
+.chorus-oda-giris__alt {
+  margin: 0 0 1em;
+  color: var(--primary-high);
+  font-size: var(--font-up-1);
+}
+
+.chorus-oda-giris__kapilar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+}
+
+.chorus-oda-giris__kapi,
+.chorus-oda-giris__kapi:visited {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+  padding: 0.45em 0.8em;
+  border: 1px solid var(--primary-low-mid);
+  border-radius: 999px;
+  color: var(--primary);
+  font-size: var(--font-down-1);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chorus-oda-giris__kapi:hover {
+  border-color: var(--primary-high);
+}
+
+.chorus-oda-giris__kapi .chorus-radyo__dot {
+  margin: 0;
+}
+
+.chorus-oda-giris__bos {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 1.2em 0 0;
+  color: var(--primary-high);
+  font-style: italic;
+}
+
+.kepenk-yuz--kucuk {
+  width: 26px;
+  height: 26px;
+  flex: none;
+}
+
+/* Oda sayfasında Discourse'un kendi kategori başlığı tekrar etmesin */
+body.chorus-oda-giris-on .category-heading,
+body.chorus-oda-giris-on .category-title-header {
+  display: none;
+}
+
+/* ---------- Ana sayfa ---------- */
+/* Varsayılan konu listesi ana sayfadan kalktı; konuşmalar Takıl'da */
+body.chorus-vitrin-on .list-controls,
+body.chorus-vitrin-on #list-area,
+body.chorus-vitrin-on .navigation-container,
+body.chorus-vitrin-on .topic-list-bottom {
+  display: none;
+}
+
+/* "İnsanların durduğu saniyeler" ana sayfada gösterilmiyor */
+/* (sadece üyelerde; ziyaretçide "Önce dinle" kapısı bu bloğa kaydırıyor) */
+body.chorus-vitrin-on .chorus-vitrin.is-member .chorus-vitrin__block:has(> .chorus-vitrin__moments) {
+  display: none;
+}
+
+.chorus-bugun__soru,
+.chorus-bugun__soru:visited {
+  display: block;
+  margin: 0.2em 0 0.6em;
+  color: var(--primary);
+  font-size: var(--font-up-2);
+  font-weight: 600;
+  line-height: 1.25;
+  text-decoration: none;
+}
+
+.chorus-bugun__git,
+.chorus-bugun__git:visited {
+  display: inline-block;
+  margin-top: 0.4em;
+  color: var(--tertiary);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: var(--font-down-1);
+  text-decoration: none;
+}
+
+.chorus-takilda__liste {
+  list-style: none;
+  margin: 0.6em 0 0.4em;
+  padding: 0;
+}
+
+.chorus-takilda__liste li {
+  padding: 0.6em 0;
+  border-bottom: 1px solid var(--primary-low);
+}
+
+.chorus-takilda__liste a,
+.chorus-takilda__liste a:visited {
+  display: block;
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.chorus-takilda__meta {
+  display: block;
+  margin-top: 0.2em;
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+}
+
+
+/* ---------- Takıl masası: son açılan konular ve sayfadan çıkmadan cevap ---------- */
+.chorus-takilda__liste .takil-masa__konu {
+  padding: 14px 0 16px;
+}
+.takil-masa__ust {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 10px;
+}
+.chorus-takilda__liste .takil-masa__baslik {
+  display: inline;
+}
+.takil-masa__baslik:hover {
+  text-decoration: underline;
+  text-decoration-color: #f45139;
+}
+.takil-masa__ust .chorus-takilda__meta {
+  margin: 0;
+}
+.takil-masa__ozet {
+  max-width: 68ch;
+  margin: 6px 0 0;
+  color: var(--primary-high);
+  font-size: var(--font-down-1);
+  line-height: 1.45;
+}
+.takil-masa__son {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 68ch;
+  margin: 8px 0 0;
+  color: var(--primary-high);
+  font-size: var(--font-down-1);
+}
+.takil-masa__son b {
+  flex: none;
+  color: var(--primary);
+  font-weight: 600;
+}
+.takil-masa__son span {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--chorus-serif, "Newsreader", serif);
+  font-style: italic;
+}
+.takil-masa__avatar {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+.takil-masa__cevap {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 640px;
+  margin: 10px 0 0;
+}
+.takil-masa__cevap .takil-masa__kutu {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+  height: 36px;
+  min-height: 36px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--primary-low-mid);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--primary);
+  font: inherit;
+  font-size: var(--font-down-1);
+  line-height: 1.4;
+  resize: none;
+  transition: height 0.2s ease, border-color 0.2s ease;
+}
+.takil-masa__cevap .takil-masa__kutu:focus,
+.takil-masa__cevap .takil-masa__kutu:not(:placeholder-shown) {
+  height: 76px;
+  border-color: var(--primary-medium);
+  outline: none;
+}
+.takil-masa__gonder {
+  flex: none;
+  padding: 8px 12px;
+  border: 1px solid #e3ff45;
+  background: #e3ff45;
+  color: #171716;
+  font-size: var(--font-down-1);
+  font-weight: 600;
+  cursor: pointer;
+}
+.takil-masa__kutu:placeholder-shown:not(:focus) + .takil-masa__gonder {
+  border-color: var(--primary-low-mid);
+  background: transparent;
+  color: var(--primary-medium);
+}
+.takil-masa__gonder:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.takil-masa__hata {
+  margin: 6px 0 0;
+  color: #f45139;
+  font-size: var(--font-down-1);
+}
+.takil-masa__tamam {
+  margin: 10px 0 0;
+  color: var(--primary-high);
+  font-size: var(--font-down-1);
+}
+.chorus-takilda__liste .takil-masa__tamam a {
+  display: inline;
+  color: #e3ff45;
+}
+.chorus-takilda__liste .takil-masa__gir {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--tertiary);
+  font-family: var(--chorus-mono, "IBM Plex Mono", monospace);
+  font-size: var(--font-down-1);
+  font-weight: 400;
+}
+@media (prefers-reduced-motion: reduce) {
+  .takil-masa__cevap .takil-masa__kutu {
+    transition: none;
+  }
+}
+
+/* Cevap kutusu: kapalıyken kaydırma oku görünmesin */
+.takil-masa__cevap .takil-masa__kutu {
+  overflow: hidden;
+}
+.takil-masa__cevap .takil-masa__kutu:focus,
+.takil-masa__cevap .takil-masa__kutu:not(:placeholder-shown) {
+  overflow-y: auto;
+}
+
+
+// Bugün: birden fazla satır (soru, kör dinleme, dört dörtlük)
+.chorus-bugun__satir + .chorus-bugun__satir { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--primary-low); }

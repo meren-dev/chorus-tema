@@ -1,0 +1,108 @@
+import { apiInitializer } from "discourse/lib/api";
+import ChorusMuzikoloji from "../components/chorus-muzikoloji";
+import { dortDortluk, dortlukBittiMi } from "../lib/chorus-dortluk";
+import { korOyunu } from "../lib/chorus-kor-oyun";
+import { gonderiNotu, miniNotu, notlariYukle, sohbetNotu } from "../lib/chorus-notlar";
+import { kesitDurdur } from "../lib/chorus-onizleme";
+import { ortakListe } from "../lib/chorus-ortak";
+import { nowPlaying } from "../lib/chorus-queue";
+import { CHANNEL_ID } from "../lib/chorus-radyo";
+import { gununSorusu } from "../lib/chorus-soru";
+
+// Chorus · Oyna, notlar ve ortak liste
+// 1 · Kepenk'in notları: mini çalar, radyo sohbeti ve şarkı gönderileri (lib/chorus-notlar.js)
+// 2 · Kör Dinleme oyunu: [wrap=kor-dinleme sanatci="…" sarki="…"] (lib/chorus-kor-oyun.js)
+// 3 · Dört Dörtlük: [wrap=dort-dortluk …] (lib/chorus-dortluk.js)
+// 4 · Günün Sorusu: anket ya da [wrap=bilgi dogru="…"] (lib/chorus-soru.js)
+// 5 · Ortak liste: "ortak-liste" etiketli liste konuları (lib/chorus-ortak.js)
+// 6 · Müzikoloji kartları: Oku ve Oku › Müzikoloji sayfasının başı (components/chorus-muzikoloji.gjs)
+
+export default apiInitializer((api) => {
+  const user = api.getCurrentUser();
+  const composer = () => api.container.lookup("service:composer");
+
+  // Notları erken yükle; mini çalarda şarkı değişince not var mı bak
+  setTimeout(() => notlariYukle(), 3000);
+  let sonUrl = null;
+  document.addEventListener("chorus:queue", (e) => {
+    const url = e.detail?.playing ? e.detail.url : null;
+    if (url && url !== sonUrl) {
+      sonUrl = url;
+      miniNotu(nowPlaying().item);
+    }
+  });
+
+  const cevapYaz = (topic) => (metin) =>
+    composer().open({ action: "reply", topic, draftKey: topic.draft_key, draftSequence: topic.draft_sequence, reply: metin });
+
+  api.decorateCookedElement(
+    (elem, helper) => {
+      const post = helper?.getModel?.();
+      const topic = post?.topic;
+      if (!post || !topic) {
+        return;
+      }
+      const ilk = post.post_number === 1;
+
+      // 2 · Kör Dinleme oyunu (ekip önizlemesi: konsolda window.chorusOyunTest = true, sonra konuya yeniden gir)
+      if (ilk) {
+        elem.querySelectorAll(".d-wrap[data-wrap='kor-dinleme'][data-sanatci][data-sarki]").forEach((w) => {
+          const zorla = !!window.chorusOyunTest;
+          if (!w.classList.contains("is-locked") && !zorla) {
+            return;
+          }
+          if (zorla) {
+            w.classList.add("is-locked");
+            document.body.dataset.chorusKorLocked = String(topic.id);
+          }
+          korOyunu(w, { topic, user, cevapYaz: cevapYaz(topic) });
+        });
+      }
+
+      // 3 · Dört Dörtlük: bitirmeden cevaplar bulanık
+      if (ilk) {
+        const dd = elem.querySelector(".d-wrap[data-wrap='dort-dortluk']");
+        if (dd) {
+          if (!dortlukBittiMi(topic.id)) {
+            document.body.dataset.chorusDortlukLocked = String(topic.id);
+          }
+          dortDortluk(dd, { topic, user, cevapYaz: cevapYaz(topic), bitti: () => delete document.body.dataset.chorusDortlukLocked });
+        }
+      }
+
+      // 4 · Günün Sorusu (anket olan her ilk gönderi; bilgi sorusunda doğru cevap işaretlenir)
+      if (ilk && elem.querySelector(".poll, .poll-outlet")) {
+        gununSorusu(elem, { post, topic });
+      }
+
+      // 5 · Ortak liste
+      if (ilk) {
+        ortakListe(elem, { topic, user, composer: composer() });
+      }
+
+      // 1 · Kepenk'in notu (not defterinde, radyo defterinde ve oyunlarda değil: cevabı ele vermesin)
+      if (![34, 35].includes(topic.id) && ![11, 19, 20].includes(topic.category_id)) {
+        gonderiNotu(elem);
+      }
+    },
+    { id: "chorus-oyna", afterAdopt: true }
+  );
+
+  // 1 · radyo sohbetinde şarkının altında Kepenk'in notu
+  api.decorateChatMessage?.((elem, message, channel) => {
+    if (channel?.id === CHANNEL_ID) {
+      sohbetNotu(elem, message);
+    }
+  });
+
+  api.onPageChange((url) => {
+    kesitDurdur();
+    const id = document.body.dataset.chorusDortlukLocked;
+    if (id && !url.includes(`/${id}`)) {
+      delete document.body.dataset.chorusDortlukLocked;
+    }
+  });
+
+  // 6 · müzikoloji kartları
+  api.renderInOutlet("discovery-list-container-top", ChorusMuzikoloji);
+});

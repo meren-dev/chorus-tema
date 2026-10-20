@@ -1,0 +1,46 @@
+// Emoji boyutu bileşeninden (common)
+// Chorus · Emoji boyutu
+// Kepenk tepkileri ve özel emojiler 16-20px'te kayboluyordu; büyütüldü.
+
+// Gönderi altındaki tepki sayacı
+.discourse-reactions-list .reactions .discourse-reactions-list-emoji {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  img.emoji {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+// Tepki butonu (bırakılan tepkinin görseli)
+.discourse-reactions-reaction-button .btn-toggle-reaction-emoji {
+  width: 24px;
+  height: 24px;
+}
+
+// Tepki seçici
+.discourse-reactions-picker .pickable-reaction img.emoji {
+  width: 36px;
+  height: 36px;
+}
+
+// Yazı ve sohbet içindeki Chorus emojileri
+.cooked img.emoji.emoji-custom,
+.chat-message-text img.emoji.emoji-custom {
+  width: 1.6em;
+  height: 1.6em;
+}
+
+// Sadece emojiden oluşan mesajlar
+.cooked img.emoji.only-emoji,
+.chat-message-text img.emoji.only-emoji {
+  width: 48px;
+  height: 48px;
+}
+
+// Sohbet tepkileri
+.chat-message-reaction img.emoji {
+  width: 22px;
+  height: 22px;
+}
