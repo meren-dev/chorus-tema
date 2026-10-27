@@ -41,6 +41,29 @@ export function nextSlot(now = new Date()) {
   return slot || `yarın ${SLOTS[0]}`;
 }
 
+// Radyo kuyruğu zengin yazı kutusunda yazılırsa elle yazılan ** kaçışlı kaydedilir
+// ("**\*\*Şarkı\*\***"); okurken kaçışları çöz, üst üste binen yıldızları tek kalına indir.
+export function duzMetin(text) {
+  return String(text || "")
+    .replace(/\\([!-/:-@[-`{-~])/g, "$1")
+    .replace(/\*{3,}/g, "**");
+}
+
+// Sohbette ve radyonun defterinde bu yüzden görünen ** işaretlerini sil (kod blokları hariç)
+export function yildizTemizle(elem) {
+  if (!elem) {
+    return;
+  }
+  const walker = document.createTreeWalker(elem, NodeFilter.SHOW_TEXT, {
+    acceptNode: (n) => (n.parentElement?.closest("code, pre") || !n.nodeValue.includes("**") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+  });
+  const nodes = [];
+  while (walker.nextNode()) {
+    nodes.push(walker.currentNode);
+  }
+  nodes.forEach((n) => (n.nodeValue = n.nodeValue.replace(/\*\*/g, "")));
+}
+
 function clean(text) {
   return String(text || "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
@@ -51,7 +74,7 @@ function clean(text) {
 
 // Radyo mesajını parçalarına ayırır: { url, artist, title, note, by, at }; radyo mesajı değilse null
 export function parseRadioMessage(m) {
-  const raw = String(m?.message || "");
+  const raw = duzMetin(m?.message);
   const sign = raw.match(SIGN);
   if (!sign) {
     return null;

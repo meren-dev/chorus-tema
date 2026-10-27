@@ -266,6 +266,21 @@ export function playQueue(items, start = 0, meta = null, seconds = 0) {
   load(s, seconds);
 }
 
+// Çalan sıra bu listeye aitse yeni parçaları sona ekle (ortak listeye şarkı eklenince sıra uzar)
+export function extendQueue(listUrl, items) {
+  if (!listUrl || state.meta?.url !== listUrl || !state.items.length) {
+    return false;
+  }
+  const mevcut = new Set(state.items.map((x) => x.url));
+  const yeni = (items || []).filter((x) => x && x.kind && x.id && !mevcut.has(x.url));
+  if (!yeni.length) {
+    return false;
+  }
+  state.items = [...state.items, ...yeni];
+  render();
+  return true;
+}
+
 export function stop() {
   state.items = [];
   state.playing = false;

@@ -12,7 +12,8 @@ export function onizlemeBul(sanatci, sarki) {
     const url = `/workflows/webhooks/onizleme?a=${encodeURIComponent(sanatci || "")}&t=${encodeURIComponent(sarki || "")}`;
     bulunan.set(
       anahtar,
-      fetch(url, { headers: { Accept: "application/json" } })
+      // çerez gönderilmez: istek herkese açık, akışın kayıtlarına oturum bilgisi düşmesin
+      fetch(url, { headers: { Accept: "application/json" }, credentials: "omit" })
         .then((r) => (r.ok ? r.json() : null))
         .then((j) => (j && j.preview ? j : null))
         .catch(() => null)

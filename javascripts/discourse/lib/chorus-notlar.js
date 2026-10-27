@@ -59,7 +59,8 @@ export function notlariYukle() {
     const harita = new Map();
     try {
       // Not defteri ekip içinde; notlar siteye "Kepenk'in notları · okuma" akışından gelir
-      const r = await fetch(NOT_ADRESI, { headers: { Accept: "application/json" } });
+      // çerez gönderilmez: istek herkese açık, akışın kayıtlarına oturum bilgisi düşmesin
+      const r = await fetch(NOT_ADRESI, { headers: { Accept: "application/json" }, credentials: "omit" });
       const j = r.ok ? await r.json() : null;
       (j?.notlar || []).forEach((p) => {
         const n = cozumle(p.raw);

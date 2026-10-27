@@ -1,10 +1,16 @@
 // Chorus · Liste oluştur
-// Bağlantıyı yapıştır, şarkı adı kendiliğinden gelsin; sırala, her şarkıya tek cümle yaz.
+// Bağlantıyı yapıştır, şarkının adı ve sanatçısı kendiliğinden gelsin; sırala, her şarkıya tek cümle yaz.
 // Sonuç her yerde aynı biçimdeki listedir: yeni konu olarak açılır ya da yazı kutusuna eklenir.
-import { itemsToMarkdown, mediaFromUrl, resolveMeta } from "./chorus-media";
+// Tüm liste (Spotify/YouTube çalma listesi) varsa şarkı eklemek isteğe bağlıdır; listenin görseli
+// istenirse kapak olur (konunun görseli: vitrin, paylaşım önizlemesi). Gönderide tüm liste üstte durur.
+import { coverFor, itemsToMarkdown, mediaFromUrl, oembed, resolveMeta } from "./chorus-media";
 
 export const LISTELER = 10;
 export const CHORUS_SECKILERI = 12;
+// Liste kapağının gönderideki görselinin adı; gönderinin içinde gizli durur (common.scss)
+export const KAPAK_ALT = "liste kapağı";
+
+const TUR = { playlist: "çalma listesi", album: "albüm", track: "şarkı", episode: "bölüm", video: "video" };
 
 // Chorus Seçkileri'ni ekip ve Küratörler grubu açar
 export function isCurator(user) {
@@ -35,18 +41,26 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
         mode === "topic"
           ? `<label class="chorus-builder__field"><span>Listenin adı</span><input name="title" type="text" maxlength="120" placeholder="Pazar sabahı, mutfakta" required></label>
              <label class="chorus-builder__field"><span>Bu liste ne için? <small>bir iki cümle</small></span><textarea name="intro" rows="2" maxlength="480" placeholder="Kahve demlenirken açtığım, sesi kısık kalan şarkılar."></textarea></label>
-             <label class="chorus-builder__field"><span>Tüm liste bir yerde varsa <small>isteğe bağlı · Spotify ya da YouTube çalma listesi</small></span><input name="source" type="url" placeholder="https://open.spotify.com/playlist/..."></label>
+             <label class="chorus-builder__field"><span>Tüm liste bir yerde varsa <small>isteğe bağlı · Spotify ya da YouTube çalma listesi</small></span><input name="source" type="url" placeholder="https://open.spotify.com/playlist/..." autocomplete="off"></label>
+             <div class="chorus-builder__kaynak" hidden>
+               <img class="chorus-builder__kapak" alt="" width="64" height="64">
+               <div class="chorus-builder__kaynak-bilgi">
+                 <strong></strong>
+                 <small></small>
+                 <label class="chorus-builder__check chorus-builder__kapak-sec"><input name="kapak" type="checkbox" checked> Kapak olarak bu görseli kullan</label>
+               </div>
+             </div>
              <label class="chorus-builder__check"><input name="ortak" type="checkbox"> Ortak liste: herkes şarkı ekleyebilsin</label>
              ${
                staff
                  ? `<label class="chorus-builder__check"><input name="curated" type="checkbox"> Chorus seçkisi olarak yayımla</label>`
                  : ""
              }
-             <p class="chorus-builder__ipucu">Kendi kapağını kullanmak istersen yazı kutusuna bir görsel ekle; eklemezsen ilk dört şarkının kapağından kolaj olur.</p>`
+             <p class="chorus-builder__ipucu">Kapak: tüm listenin görseli; o yoksa ilk dört şarkının kapağından kolaj. Kendi görselini kullanacaksan kutuyu kaldır, görseli yazı kutusuna ekle.</p>`
           : ""
       }
       <div class="chorus-builder__add">
-        <label class="chorus-builder__field"><span>Şarkı ekle <small>Spotify ya da YouTube bağlantısını yapıştır</small></span>
+        <label class="chorus-builder__field"><span>Şarkı ekle <small>${mode === "topic" ? "tüm liste varsa isteğe bağlı · " : ""}Spotify ya da YouTube bağlantısını yapıştır</small></span>
           <div class="chorus-builder__addrow"><input name="link" type="url" placeholder="https://open.spotify.com/track/..." autocomplete="off"><button type="button" class="btn btn-primary" data-b="add">Ekle</button></div>
         </label>
         <p class="chorus-builder__msg" aria-live="polite"></p>
@@ -62,6 +76,51 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
   const list = wrap.querySelector(".chorus-builder__items");
   const msg = wrap.querySelector(".chorus-builder__msg");
   const link = form.elements.link;
+  const kaynakKutu = wrap.querySelector(".chorus-builder__kaynak");
+  let kaynak = null; // tanınan tüm liste: { media, title, cover }
+  let kaynakSira = 0;
+  let adElle = false; // listenin adını kişi yazdıysa tüm listenin adıyla değiştirme
+
+  // Tüm liste bağlantısı: adını ve görselini göster, ad boşsa listenin adını öner
+  async function kaynakBak(uyar = false) {
+    const input = form.elements.source;
+    if (!input) {
+      return;
+    }
+    const v = input.value.trim();
+    const media = mediaFromUrl(v);
+    const sira = ++kaynakSira;
+    if (!media) {
+      kaynak = null;
+      kaynakKutu.hidden = true;
+      if (v && uyar) {
+        msg.textContent = "Tüm liste bağlantısını tanıyamadım. Spotify ya da YouTube çalma listesi olmalı.";
+      }
+      return;
+    }
+    if (kaynak?.media.url === media.url) {
+      return;
+    }
+    msg.textContent = "";
+    const [j, c] = await Promise.all([oembed(media), coverFor(media)]);
+    if (sira !== kaynakSira) {
+      return;
+    }
+    kaynak = { media, title: String(j?.title || "").trim(), cover: c?.src || j?.thumbnail_url || "" };
+    kaynakKutu.hidden = false;
+    kaynakKutu.querySelector("strong").textContent = kaynak.title || "Tüm liste";
+    kaynakKutu.querySelector("small").textContent = `${media.kind === "spotify" ? "Spotify" : "YouTube"} · ${TUR[media.type] || media.type}`;
+    const img = kaynakKutu.querySelector("img");
+    img.hidden = !kaynak.cover;
+    if (kaynak.cover) {
+      img.src = kaynak.cover;
+    }
+    kaynakKutu.querySelector(".chorus-builder__kapak-sec").hidden = !kaynak.cover;
+    const ad = form.elements.title;
+    if (ad && kaynak.title && (!ad.value.trim() || !adElle)) {
+      ad.value = kaynak.title;
+    }
+  }
 
   const close = () => {
     wrap.remove();
@@ -113,7 +172,7 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
     if (added) {
       const last = list.lastElementChild;
       const empty = last?.querySelector('input[data-k="artist"]:placeholder-shown') || last?.querySelector('input[data-k="note"]');
-      msg.textContent = items[items.length - 1].artist ? "Eklendi. İstersen bir cümle not ekle." : "Eklendi. Spotify sanatçı adını vermiyor; sen yaz.";
+      msg.textContent = items[items.length - 1].artist ? "Eklendi. İstersen bir cümle not ekle." : "Eklendi. Sanatçının adını bulamadım; sen yaz.";
       empty?.focus();
     }
   }
@@ -152,16 +211,41 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
   });
   link.addEventListener("paste", () => setTimeout(add, 50));
 
-  form.addEventListener("submit", (e) => {
+  const source = form.elements.source;
+  if (source) {
+    let bekle = null;
+    source.addEventListener("input", () => {
+      clearTimeout(bekle);
+      bekle = setTimeout(() => kaynakBak(false), 400);
+    });
+    source.addEventListener("paste", () => setTimeout(() => kaynakBak(true), 50));
+    source.addEventListener("change", () => kaynakBak(true));
+  }
+  form.elements.title?.addEventListener("input", (e) => (adElle = !!e.target.value.trim()));
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    // tüm liste yapıştırılır yapıştırılmaz gönderildiyse kapağını bekle
+    const yeniKaynak = mode === "topic" ? mediaFromUrl(form.elements.source.value.trim()) : null;
+    if (yeniKaynak && kaynak?.media.url !== yeniKaynak.url) {
+      await kaynakBak(false);
+    }
     const missing = items.findIndex((it) => !String(it.artist).trim() || !String(it.title).trim());
     if (mode === "topic" && !form.elements.title.value.trim()) {
       msg.textContent = "Listeye bir ad ver.";
       form.elements.title.focus();
       return;
     }
-    if (!items.length) {
-      msg.textContent = "En az bir şarkı ekle.";
+    const sourceText = mode === "topic" ? form.elements.source.value.trim() : "";
+    const sourceMedia = mediaFromUrl(sourceText);
+    if (sourceText && !sourceMedia) {
+      msg.textContent = "Tüm liste bağlantısını tanıyamadım. Spotify ya da YouTube çalma listesi olmalı.";
+      form.elements.source.focus();
+      return;
+    }
+    // Tüm liste varsa şarkı eklemek isteğe bağlı
+    if (!items.length && !sourceMedia) {
+      msg.textContent = mode === "topic" ? "En az bir şarkı ya da tüm listenin bağlantısını ekle." : "En az bir şarkı ekle.";
       link.focus();
       return;
     }
@@ -170,20 +254,24 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
       list.children[missing]?.querySelector("input")?.focus();
       return;
     }
-    const lines = itemsToMarkdown(items);
+    const lines = items.length ? itemsToMarkdown(items) : "";
     if (mode === "insert") {
       close();
       onDone?.({ markdown: `\n${lines}\n` });
       return;
     }
     const intro = form.elements.intro.value.trim();
-    const source = mediaFromUrl(form.elements.source.value)?.url || "";
+    const sourceUrl = sourceMedia?.url || "";
     const ortak = !!form.elements.ortak?.checked;
     const curated = !!form.elements.curated?.checked;
+    const kapak =
+      kaynak?.cover && kaynak.media.url === sourceUrl && form.elements.kapak?.checked ? `![${KAPAK_ALT}](${kaynak.cover})` : "";
+    // Sıra: (gizli) kapak, giriş, tüm liste, şarkılar, davet
     const body = [
+      kapak,
       intro && `**${curated ? "Bu seçki" : "Bu liste"} ne için?** ${intro}`,
+      sourceUrl && (lines ? `Tüm liste bir arada:\n\n${sourceUrl}` : sourceUrl),
       lines,
-      source && `Tüm liste bir arada:\n\n${source}`,
       ortak ? "Bu ortak bir liste: sen de ekle. Konunun başındaki **+ Şarkı ekle** düğmesine bas, yanına neden burada olduğunu tek cümleyle yaz." : "Sen bu listeye ne eklerdin?",
     ]
       .filter(Boolean)

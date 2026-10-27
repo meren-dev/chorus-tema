@@ -1,10 +1,12 @@
+import { openEserDialog } from "./chorus-eser";
 import { playQueue } from "./chorus-queue";
 import { itemsFromCooked, mediaFromUrl } from "./chorus-media";
 
 // Chorus · aktif tanık
 // 1 · Yoğunluk şeridi: bir konudaki bütün "Tam burada" anları şarkının oynatıcısının altında tek bir şeritte.
 //     Kimse bir şey yazmadan da başkalarının nerede durduğu görülür; noktaya basınca şarkı o saniyeye sarılır.
-// 2 · "Bir eser bağla": ilk gönderinin altında; eser bağlantısı + "neden buraya" cümlesiyle cevap açar.
+// 2 · "Bir eser bağla": ilk gönderinin altında; eser bağlantısı (önizlemesiyle) + "neden buraya" cümlesi
+//     penceresini açar, sonra cevap kutusunu bağlantı kendi satırında olacak şekilde doldurur (lib/chorus-eser.js).
 
 const TS = /(^|[^\d:])(\d{1,2}):([0-5]\d)(?![\d:])/g;
 const PLAYER = ".chorus-spotify, .chorus-yt-box, .lazy-video-wrapper, .lazy-video-container, .onebox.video-onebox, aside.onebox[data-onebox-src*='youtube']";
@@ -79,12 +81,18 @@ export function linkWorkButton(elem, topic, composer) {
   const box = document.createElement("div");
   box.className = "chorus-link-work";
   box.innerHTML = `<button type="button" class="btn btn-small">Bağlantı ekle</button><span>Bu konuyu bir şarkıya, filme ya da kitaba bağla. Nedenini tek cümleyle yaz.</span>`;
-  box.querySelector("button").addEventListener("click", async () => {
-    await composer.open({ action: "reply", topic, draftKey: topic.draft_key, draftSequence: topic.draft_sequence });
-    const m = composer.model;
-    if (m && !String(m.reply || "").trim()) {
-      m.set("reply", "Eserin bağlantısı:\n\nBunu buraya bağlıyorum çünkü ");
-    }
+  box.querySelector("button").addEventListener("click", () => {
+    openEserDialog({
+      onDone: async ({ markdown }) => {
+        // yarım kalmış bir cevap varsa üstüne yazma, sonuna ekle
+        await composer.open({ action: "reply", topic, draftKey: topic.draft_key, draftSequence: topic.draft_sequence });
+        const m = composer.model;
+        if (m) {
+          const eski = String(m.reply || "").trim();
+          m.set("reply", eski ? `${eski}\n\n${markdown}` : markdown);
+        }
+      },
+    });
   });
   elem.appendChild(box);
 }
