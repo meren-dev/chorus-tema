@@ -8,6 +8,7 @@ import { BESLILER, findBesli, gateDialog, openBesliComposer, rememberBesli } fro
 import { anCard, openCardDialog } from "../lib/chorus-card";
 import { eserleriGoster } from "../lib/chorus-eser";
 import { CHORUS_SECKILERI, isCurator, LISTELER, openListBuilder } from "../lib/chorus-list-builder";
+import { EKIP, openSoruBuilder, soruBekliyor, soruZamanla } from "../lib/chorus-soru-builder";
 import { decorateLists } from "../lib/chorus-lists";
 import { mediaFromUrl } from "../lib/chorus-media";
 import { playQueue, seekCurrent } from "../lib/chorus-queue";
@@ -24,6 +25,7 @@ import { currentSeconds, fmt, listen, seekFromChip, takeOverYoutube } from "../l
 // 0 · Spotify bağlantılarını oynatıcıya çevirme.
 // 6 · Beşli kuralı: ilk paylaşım beşli; herkesin tek beşlisi var (lib/chorus-besli.js).
 // 7 · Listeler: liste oluşturucu (lib/chorus-list-builder.js) ve kalıcı mini çalar (lib/chorus-queue.js).
+//     Günün Sorusu: soru penceresi ve yayın zamanlayıcısı (lib/chorus-soru-builder.js).
 // 8 · Aktif tanık: Tam burada yoğunluk şeridi ve "Bir eser bağla" (lib/chorus-witness.js, lib/chorus-eser.js).
 
 const TS_TEST = /(^|[^\d:])(\d{1,2}):([0-5]\d)(?![\d:])/;
@@ -236,6 +238,21 @@ export default apiInitializer((api) => {
               });
               return;
             }
+            // Günün Sorusu: iki biçimli şablon yerine soru penceresi (lib/chorus-soru-builder.js).
+            // Ekip yayın saatini seçer: konu ekip içinde açılır, kaydedilince taşıma zamanlayıcısı kurulur.
+            const gununSorusu = Number(settings.gunun_sorusu) || 19;
+            if (cat === gununSorusu && isCurator(user)) {
+              const site = api.container.lookup("service:site");
+              const kat = (id) => (site.categories || []).find((c) => c.id === id);
+              openSoruBuilder({
+                zamanla: !!user.staff && !!kat(EKIP),
+                onDone: ({ title, body, zaman }) => {
+                  soruBekliyor(zaman ? title : null, zaman, gununSorusu);
+                  this.openNewTopic({ category: kat(zaman ? EKIP : gununSorusu), title, body });
+                },
+              });
+              return;
+            }
           }
           return super.open(...arguments);
         }
@@ -266,6 +283,11 @@ export default apiInitializer((api) => {
       rememberBesli(user.username, { id: createdPost.topic_id, slug: createdPost.topic_slug || "-", title: composer?.title });
       api.container.lookup("service:app-events").trigger("chorus:besli-created");
     }
+    // ekip içinde açılan Günün Sorusu: yayın zamanlayıcısını kur
+    soruZamanla(createdPost, composer, {
+      toasts: api.container.lookup("service:toasts"),
+      dialog: api.container.lookup("service:dialog"),
+    });
   });
 
   // 1, 3, 4 · gönderi süslemeleri
