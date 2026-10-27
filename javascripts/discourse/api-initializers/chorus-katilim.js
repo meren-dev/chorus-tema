@@ -6,6 +6,7 @@ import ChorusVitrin from "../components/chorus-vitrin";
 import ChorusRadyoBar from "../components/chorus-radyo-bar";
 import { BESLILER, findBesli, gateDialog, openBesliComposer, rememberBesli } from "../lib/chorus-besli";
 import { anCard, openCardDialog } from "../lib/chorus-card";
+import { eserleriGoster } from "../lib/chorus-eser";
 import { CHORUS_SECKILERI, isCurator, LISTELER, openListBuilder } from "../lib/chorus-list-builder";
 import { decorateLists } from "../lib/chorus-lists";
 import { mediaFromUrl } from "../lib/chorus-media";
@@ -23,7 +24,7 @@ import { currentSeconds, fmt, listen, seekFromChip, takeOverYoutube } from "../l
 // 0 · Spotify bağlantılarını oynatıcıya çevirme.
 // 6 · Beşli kuralı: ilk paylaşım beşli; herkesin tek beşlisi var (lib/chorus-besli.js).
 // 7 · Listeler: liste oluşturucu (lib/chorus-list-builder.js) ve kalıcı mini çalar (lib/chorus-queue.js).
-// 8 · Aktif tanık: Tam burada yoğunluk şeridi ve "Bir eser bağla" (lib/chorus-witness.js).
+// 8 · Aktif tanık: Tam burada yoğunluk şeridi ve "Bir eser bağla" (lib/chorus-witness.js, lib/chorus-eser.js).
 
 const TS_TEST = /(^|[^\d:])(\d{1,2}):([0-5]\d)(?![\d:])/;
 const TS_ALL = /(^|[^\d:])(\d{1,2}):([0-5]\d)(?![\d:])/g;
@@ -277,6 +278,11 @@ export default apiInitializer((api) => {
       decorateLists(elem, topic ? { title: topic.title, url: `/t/${topic.slug}/${topic.id}` } : null);
       embedSpotify(elem);
       takeOverYoutube(elem);
+      // bağlanan eserler: Instagram gömülü, eski biçimdeki "Eserin bağlantısı: …" önizlemeli
+      // (yazı kutusunun önizlemesinde değil: her tuşta yeniden yüklenmesin)
+      if (post) {
+        eserleriGoster(elem);
+      }
 
       // 4 · kör dinleme
       const kor = elem.querySelectorAll(".d-wrap[data-wrap='kor-dinleme']");

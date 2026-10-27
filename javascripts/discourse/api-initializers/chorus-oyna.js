@@ -4,9 +4,9 @@ import { dortDortluk, dortlukBittiMi } from "../lib/chorus-dortluk";
 import { korOyunu } from "../lib/chorus-kor-oyun";
 import { gonderiNotu, miniNotu, notlariYukle, sohbetNotu } from "../lib/chorus-notlar";
 import { kesitDurdur } from "../lib/chorus-onizleme";
-import { ortakListe } from "../lib/chorus-ortak";
+import { ortakCevap, ortakListe } from "../lib/chorus-ortak";
 import { nowPlaying } from "../lib/chorus-queue";
-import { CHANNEL_ID } from "../lib/chorus-radyo";
+import { ARCHIVE_TOPIC, CHANNEL_ID, yildizTemizle } from "../lib/chorus-radyo";
 import { gununSorusu } from "../lib/chorus-soru";
 
 // Chorus · Oyna, notlar ve ortak liste
@@ -15,6 +15,7 @@ import { gununSorusu } from "../lib/chorus-soru";
 // 3 · Dört Dörtlük: [wrap=dort-dortluk …] (lib/chorus-dortluk.js)
 // 4 · Günün Sorusu: anket ya da [wrap=bilgi dogru="…"] (lib/chorus-soru.js)
 // 5 · Ortak liste: "ortak-liste" etiketli liste konuları (lib/chorus-ortak.js)
+//     Radyo sohbetinde ve radyonun defterinde kaçışlı ** işaretleri silinir (lib/chorus-radyo.js)
 // 6 · Müzikoloji kartları: Oku ve Oku › Müzikoloji sayfasının başı (components/chorus-muzikoloji.gjs)
 
 export default apiInitializer((api) => {
@@ -75,9 +76,16 @@ export default apiInitializer((api) => {
         gununSorusu(elem, { post, topic });
       }
 
-      // 5 · Ortak liste
+      // 5 · Ortak liste: ilk gönderide bütün şarkılar, cevaplarda ▶ bütün listeyi çalar
       if (ilk) {
         ortakListe(elem, { topic, user, composer: composer() });
+      } else {
+        ortakCevap(elem, { topic, post });
+      }
+
+      // radyonun defterinde kaçışlı ** görünmesin
+      if (topic.id === ARCHIVE_TOPIC) {
+        yildizTemizle(elem);
       }
 
       // 1 · Kepenk'in notu (not defterinde, radyo defterinde ve oyunlarda değil: cevabı ele vermesin)
@@ -91,6 +99,7 @@ export default apiInitializer((api) => {
   // 1 · radyo sohbetinde şarkının altında Kepenk'in notu
   api.decorateChatMessage?.((elem, message, channel) => {
     if (channel?.id === CHANNEL_ID) {
+      yildizTemizle(elem);
       sohbetNotu(elem, message);
     }
   });
