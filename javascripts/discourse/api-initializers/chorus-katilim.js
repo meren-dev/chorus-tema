@@ -227,7 +227,8 @@ export default apiInitializer((api) => {
             }
           }
           // Listeler'de yeni konu: önce liste oluşturucu, sonra hazır gövdeyle yazı kutusu
-          if (act === "createTopic" && !opts.topicBody && !opts.chorusSkipBuilder) {
+          // (kayıtlı bir taslağa dönülüyorsa pencere açılmaz, taslak olduğu gibi açılır)
+          if (act === "createTopic" && !opts.topicBody && !opts.draft && !opts.chorusSkipBuilder) {
             const cat = Number(opts.topicCategoryId ?? opts.categoryId ?? opts.prioritizedCategoryId ?? opts.category?.id);
             if (cat === LISTELER || cat === CHORUS_SECKILERI) {
               const site = api.container.lookup("service:site");
