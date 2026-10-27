@@ -97,11 +97,26 @@ export default apiInitializer((api) => {
   );
 
   // 1 · radyo sohbetinde şarkının altında Kepenk'in notu
-  api.decorateChatMessage?.((elem, message, channel) => {
-    if (channel?.id === CHANNEL_ID) {
-      yildizTemizle(elem);
-      sohbetNotu(elem, message);
-    }
+  // Sohbet süsleyicisi yalnızca mesajın öğesini verir (kanal ve mesaj gelmez) ve bunu öğe sayfaya
+  // eklenmeden yapar; öğe yerine oturunca hangi kanalda olduğuna bakılır.
+  const radyoMu = (elem) => {
+    const kanal = elem?.closest?.(".chat-channel[data-id]")?.dataset.id || elem?.closest?.("[data-chat-channel-id]")?.dataset.chatChannelId;
+    return Number(kanal) === CHANNEL_ID;
+  };
+  api.decorateChatMessage?.((elem) => {
+    const bak = (deneme = 0) => {
+      if (!elem?.isConnected) {
+        if (deneme < 5) {
+          requestAnimationFrame(() => bak(deneme + 1));
+        }
+        return;
+      }
+      if (radyoMu(elem)) {
+        yildizTemizle(elem);
+        sohbetNotu(elem);
+      }
+    };
+    bak();
   });
 
   api.onPageChange((url) => {
