@@ -2,6 +2,7 @@
 // [wrap=kor-dinleme sanatci="…" sarki="…"] … şarkı bağlantısı … [/wrap]
 // Günde bir şarkı. Önce 1 saniye çalar; her yanlış ya da "geç" kesiti uzatır (1, 2, 4, 7, 11, 16 sn).
 // Altı hakta şarkıyı bul. Sanatçıyı bilmek sarı kare, şarkıyı bilmek yeşil.
+// Oyun sürerken şarkının kendi oynatıcısı gizli (common.scss); ses yalnızca kesitlerden gelir.
 // Bitince şarkı açılır; sonra tek kelimeyle ne hissettirdiğini yazarsın, başkalarının kelimeleri de açılır.
 import { mediaFromUrl } from "./chorus-media";
 import { kesitCal, kesitDurdur, onizlemeBul } from "./chorus-onizleme";
@@ -15,7 +16,8 @@ function anahtar(topicId) {
   return `chorus-kor-oyun-${topicId}`;
 }
 
-export function korOyunu(wrap, { topic, user, cevapYaz, acildi }) {
+// kalici = false: ekip denemesi; sonuç bu tarayıcıya yazılmaz, konuya her girişte baştan başlar
+export function korOyunu(wrap, { topic, user, cevapYaz, acildi, kalici = true }) {
   const sanatci = wrap.dataset.sanatci || "";
   const sarki = wrap.dataset.sarki || "";
   if (!sanatci || !sarki || wrap.dataset.korOyun) {
@@ -23,7 +25,8 @@ export function korOyunu(wrap, { topic, user, cevapYaz, acildi }) {
   }
   wrap.dataset.korOyun = "1";
   const link = [...wrap.querySelectorAll("a[href], iframe[src]")].map((a) => mediaFromUrl(a.getAttribute("href") || a.getAttribute("src"))).find(Boolean);
-  const kayit = oku(anahtar(topic?.id), { denemeler: [], bitti: false, kazandi: false });
+  const bos = { denemeler: [], bitti: false, kazandi: false };
+  const kayit = kalici ? oku(anahtar(topic?.id), bos) : bos;
 
   const kutu = el("div", "chorus-kor-oyun");
   wrap.after(kutu);
@@ -61,7 +64,9 @@ export function korOyunu(wrap, { topic, user, cevapYaz, acildi }) {
   const sure = () => (kayit.bitti ? 30 : SURELER[adim()]);
 
   function kaydet() {
-    yaz(anahtar(topic?.id), kayit);
+    if (kalici) {
+      yaz(anahtar(topic?.id), kayit);
+    }
   }
 
   function ciz() {
