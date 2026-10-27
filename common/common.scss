@@ -1381,6 +1381,16 @@ body.category-oku-muzikoloji #post_1 .cooked { border-left: 3px solid var(--chor
 
 // ── Kör Dinleme oyunu ──
 .chorus-kor--oyun.is-locked .chorus-kor__veil .chorus-kor__hint { display: none; }
+// Oyun sürerken şarkının oynatıcısı tamamen gizli: ses yalnızca oyunun kesitlerinden gelir
+// (örtünün sağında açık kalan Spotify düğmesi şarkının tamamını çaldırıyordu). Oyun bitince açılır.
+.chorus-kor--oyun.is-locked { display: none; }
+// Ekip için: konuyu açan oyunu görmez (şarkı ona açık); "Oyunu üye gibi dene" ile dener
+.chorus-kor-dene {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; max-width: 680px; margin: 10px 0 0;
+  span { color: var(--primary-medium); font-size: var(--font-down-1); }
+  .btn { background: transparent; color: #e3ff45; border: 1px solid #e3ff45; }
+  .btn:hover { background: #e3ff45; color: #171716; }
+}
 .chorus-kor-oyun {
   max-width: 680px; margin: 14px 0 0; padding: 14px; background: #1d1c1a; border: 1px solid #3a3936; box-shadow: 4px 4px 0 #2948b1;
   @media (min-width: $chorus-tablet) { padding: 16px 18px; box-shadow: 6px 6px 0 #2948b1; }
