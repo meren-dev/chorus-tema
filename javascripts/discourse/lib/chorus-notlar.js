@@ -182,13 +182,16 @@ export function gonderiNotu(elem) {
   });
 }
 
-// Radyo sohbeti: şarkının altında; mesaj notu zaten içeriyorsa tekrar etmez
+// Radyo sohbeti: şarkının altında; mesaj notu zaten içeriyorsa tekrar etmez.
+// Mesajın ham metni gelmezse şarkı bağlantısı ve metin mesajın kendisinden okunur.
 export function sohbetNotu(elem, mesaj) {
   if (elem.querySelector(".kepenk-not") || ekrandaNotVar()) {
     return;
   }
-  const raw = String(mesaj?.message || "");
-  const link = raw.match(/https?:\/\/[^\s)>\]]+/)?.[0];
+  const raw = String(mesaj?.message || elem.textContent || "");
+  const link =
+    String(mesaj?.message || "").match(/https?:\/\/[^\s)>\]]+/)?.[0] ||
+    [...elem.querySelectorAll("a[href], iframe[src]")].map((n) => n.getAttribute("href") || n.getAttribute("src")).find((u) => mediaFromUrl(u));
   const media = link && mediaFromUrl(link);
   if (!media) {
     return;
