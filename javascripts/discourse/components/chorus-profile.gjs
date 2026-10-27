@@ -9,7 +9,7 @@ import { ajax } from "discourse/lib/ajax";
 import { findBesli, openBesliComposer } from "../lib/chorus-besli";
 import { besliCard, openCardDialog } from "../lib/chorus-card";
 import { CHORUS_SECKILERI, isCurator, LISTELER, openListBuilder } from "../lib/chorus-list-builder";
-import { itemsFromCooked } from "../lib/chorus-media";
+import { itemsFromCooked, listItems } from "../lib/chorus-media";
 import { nowPlaying, playQueue } from "../lib/chorus-queue";
 
 // Chorus profil bloğu: özet sayfasının en üstünde, istatistiklerin önünde.
@@ -195,7 +195,8 @@ export default class ChorusProfile extends Component {
   @action
   async playList(list) {
     const t = await ajax(`/t/${list.id}.json`);
-    playQueue(itemsFromCooked(t.post_stream?.posts?.[0]?.cooked), 0, { title: list.title, url: list.url });
+    // şarkı yoksa tüm liste (Spotify/YouTube çalma listesi) çalar
+    playQueue(listItems(t.post_stream?.posts?.[0]?.cooked, list.title), 0, { title: list.title, url: list.url });
   }
 
   @action

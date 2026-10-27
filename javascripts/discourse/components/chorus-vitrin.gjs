@@ -5,7 +5,7 @@ import { on } from "@ember/modifier";
 import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { ajax } from "discourse/lib/ajax";
-import { coverFor, itemsFromCooked, mediaFromUrl } from "../lib/chorus-media";
+import { coverFor, itemsFromCooked, listItems, mediaFromUrl } from "../lib/chorus-media";
 import { nowPlaying, playQueue } from "../lib/chorus-queue";
 import { targetFor } from "../lib/chorus-witness";
 import ChorusRadyo from "./chorus-radyo";
@@ -142,10 +142,19 @@ export default class ChorusVitrin extends Component {
       const t = (r.topic_list?.topics || []).find((x) => !ABOUT.test(x.title));
       if (t) {
         const full = await ajax(`/t/${t.id}.json`);
-        const items = itemsFromCooked(full.post_stream?.posts?.[0]?.cooked).slice(0, 8);
+        const cooked = full.post_stream?.posts?.[0]?.cooked || "";
+        // şarkı yoksa tüm liste (Spotify/YouTube çalma listesi) tek parça olarak çalar
+        const items = listItems(cooked, t.title).slice(0, 8);
         if (items.length) {
-          // Kapak: konuya eklenen görsel; yoksa ilk dört şarkının kapağından kolaj
-          const own = t.image_url || new DOMParser().parseFromString(full.post_stream?.posts?.[0]?.cooked || "", "text/html").querySelector("img:not(.emoji):not(.avatar)")?.getAttribute("src");
+          // Kapak: konunun görseli (liste oluşturucuda seçilen tüm liste görseli ya da eklenen görsel);
+          // yoksa yalnızca tüm listeden oluşan listede listenin görseli, değilse ilk dört şarkının kolajı
+          const img = [...new DOMParser().parseFromString(cooked, "text/html").querySelectorAll("img:not(.emoji):not(.avatar)")].find(
+            (i) => !i.closest(".onebox, aside, blockquote")
+          );
+          let own = t.image_url || img?.getAttribute("src") || null;
+          if (!own && items[0].tum) {
+            own = (await coverFor(items[0]))?.src || null;
+          }
           const covers = own ? [] : (await Promise.all(items.slice(0, 4).map(displayCover))).map((src, i) => ({ src, tone: `chorus-tone-${i % 5}` }));
           this.secki = { title: t.title, url: `/t/${t.slug}/${t.id}`, items, curated: id === 12, by: full.details?.created_by?.name || full.details?.created_by?.username, cover: own || null, covers };
           return;
