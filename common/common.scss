@@ -1292,6 +1292,53 @@ body.chorus-vitrin-on .welcome-banner, body.chorus-vitrin-on .custom-search-bann
 .chorus-ortak__sayi { font-family: var(--chorus-mono); font-size: var(--font-down-2); color: #8a857a; }
 .chorus-ortak__eylem { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .chorus-ortak__alt { margin: 10px 0 0; color: #b7b1a3; font-size: var(--font-down-1); }
+// ortak listede tek bir "Tümünü çal" yeter: ilk gönderinin ve cevapların kendi "Çal" başlığı gizli
+.cooked.chorus-ortak-ilk > .chorus-list-head,
+.cooked.chorus-ortak-cevap > .chorus-list-head { display: none; }
+// cevaplardan gelen şarkılar ilk gönderideki listenin sonunda; kim eklediği satırın sonunda
+.chorus-ortak__satir .chorus-ortak__kim {
+  font-family: var(--chorus-mono); font-size: var(--font-down-2); color: #8a857a; white-space: nowrap;
+  &:hover { color: #e3ff45; }
+}
+
+// ── Konu içinde avatar kaydırınca yapışmasın (Discourse'un yapışkan avatarı kapalı) ──
+.topic-post .topic-avatar {
+  position: static !important;
+  top: auto !important;
+}
+
+// ── Liste oluşturucu: tüm listenin önizlemesi ve kapak seçimi ──
+.chorus-builder__kaynak {
+  display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid #3a3936; background: #1d1c1a;
+  &[hidden] { display: none; }
+}
+.chorus-builder__kapak { flex: none; width: 64px; height: 64px; object-fit: cover; background: #2c2b28; &[hidden] { display: none; } }
+.chorus-builder__kaynak-bilgi {
+  display: flex; flex-direction: column; gap: 4px; min-width: 0;
+  strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  small { color: #8a857a; font-family: var(--chorus-mono); font-size: var(--font-down-2); }
+}
+.chorus-builder__check[hidden] { display: none; }
+// Liste kapağı konunun görseli olarak durur (vitrin, paylaşım önizlemesi); gönderinin içinde
+// tüm listenin oynatıcısı kapağı zaten gösterdiği için gizli.
+.cooked img[alt="liste kapağı"],
+.cooked .lightbox-wrapper:has(img[alt="liste kapağı"]),
+.cooked p:has(> img[alt="liste kapağı"]:only-child),
+.cooked p:has(> .lightbox-wrapper img[alt="liste kapağı"]) { display: none; }
+
+// ── Bağlanan eserler: Instagram gömülü görünümü, satır içi bağlantının önizlemesi ──
+.chorus-instagram {
+  margin: 0.75em 0;
+  max-width: 420px;
+  iframe { display: block; width: 100%; height: 560px; border: 1px solid #3a3936; border-radius: 4px; background: #fff; }
+}
+.chorus-eser { margin: 0.5em 0 0.9em; max-width: 680px; }
+.chorus-eser__onizleme {
+  min-height: 1.2em; color: #8a857a; font-size: var(--font-down-1);
+  &:empty { display: none; }
+  .onebox, .chorus-instagram, .chorus-spotify { margin: 0; color: var(--primary); font-size: var(--font-0); }
+  .chorus-instagram iframe { height: 420px; }
+}
 
 // ── Müzikoloji kartları (Common Hours, Riot pembe) ──
 .chorus-muz { margin: 0 0 28px; }
