@@ -6,8 +6,26 @@ import { gonderiNotu, miniNotu, notlariYukle, sohbetNotu } from "../lib/chorus-n
 import { kesitDurdur } from "../lib/chorus-onizleme";
 import { ortakCevap, ortakListe } from "../lib/chorus-ortak";
 import { nowPlaying } from "../lib/chorus-queue";
+import { dugme, el } from "../lib/chorus-oyun";
 import { ARCHIVE_TOPIC, CHANNEL_ID, yildizTemizle } from "../lib/chorus-radyo";
 import { gununSorusu } from "../lib/chorus-soru";
+
+// Kör Dinleme: şarkı açık olan ekip üyesine (konuyu açtı ya da cevap yazdı) oyunu deneme düğmesi.
+// Deneme bu tarayıcıya kaydedilmez, cevaplar bulanıklaşmaz; konuya yeniden girince baştan başlar.
+function ekipDenemesi(w, secenek) {
+  if (w.dataset.korOyun || w.nextElementSibling?.classList.contains("chorus-kor-dene")) {
+    return;
+  }
+  const kutu = el("div", "chorus-kor-dene");
+  const b = dugme("btn btn-small", "Oyunu üye gibi dene");
+  kutu.append(b, el("span", null, "Şarkı sana açık: konuyu sen açtın ya da cevap yazdın. Deneme kaydedilmez."));
+  b.addEventListener("click", () => {
+    kutu.remove();
+    w.classList.add("chorus-kor", "is-locked");
+    korOyunu(w, { ...secenek, kalici: false });
+  });
+  w.after(kutu);
+}
 
 // Chorus · Oyna, notlar ve ortak liste
 // 1 · Kepenk'in notları: mini çalar, radyo sohbeti ve şarkı gönderileri (lib/chorus-notlar.js)
@@ -45,11 +63,15 @@ export default apiInitializer((api) => {
       }
       const ilk = post.post_number === 1;
 
-      // 2 · Kör Dinleme oyunu (ekip önizlemesi: konsolda window.chorusOyunTest = true, sonra konuya yeniden gir)
+      // 2 · Kör Dinleme oyunu. Şarkı açıksa (konuyu açan ekip ya da cevap yazmış) oyun çıkmaz;
+      //     ekip "Oyunu üye gibi dene" ile dener (eski yol: konsolda window.chorusOyunTest = true).
       if (ilk) {
         elem.querySelectorAll(".d-wrap[data-wrap='kor-dinleme'][data-sanatci][data-sarki]").forEach((w) => {
           const zorla = !!window.chorusOyunTest;
           if (!w.classList.contains("is-locked") && !zorla) {
+            if (user?.staff) {
+              ekipDenemesi(w, { topic, user, cevapYaz: cevapYaz(topic) });
+            }
             return;
           }
           if (zorla) {
