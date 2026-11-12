@@ -202,9 +202,9 @@ body .chorus-vitrin.is-member {
   background: none;
 }
 
-/* Oda girişi: kapılar sağdaki motifin altına girmesin */
+/* Oda girişi: sekmeler sağdaki motifin altına girmesin */
 @media (min-width: $chorus-tablet) {
-  .chorus-oda-giris .chorus-oda-giris__kapilar,
+  .chorus-oda-giris .chorus-oda-sekmeler,
   .chorus-oda-giris .chorus-oda-giris__bos {
     max-width: calc(100% - 400px);
   }
@@ -654,6 +654,21 @@ body:has(.kepenk-arama) .search-container .no-results-container {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5em;
+}
+.kepenk-arama__kapi,
+.kepenk-arama__kapi:visited {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.45em 0.9em;
+  border: 1px solid var(--primary-low-mid);
+  color: var(--primary);
+  font-size: var(--font-down-1);
+  font-weight: 600;
+  text-decoration: none;
+}
+.kepenk-arama__kapi:hover {
+  border-color: var(--primary-high);
 }
 
 /* Üstteki hızlı aramada sonuç yoksa: küçük Kepenk */
