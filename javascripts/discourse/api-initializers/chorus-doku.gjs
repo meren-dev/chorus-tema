@@ -5,6 +5,7 @@ import { action } from "@ember/object";
 import { service } from "@ember/service";
 import { apiInitializer } from "discourse/lib/api";
 import { ajax } from "discourse/lib/ajax";
+import { openRehber } from "../lib/chorus-rehber";
 
 // Chorus · Doku
 // 1) Sol alt köşedeki Kepenk: header'daki Takıl Kepenk'i yol gösterir, bu ise eşlik eder.
@@ -366,6 +367,13 @@ class KoseKepenk extends Component {
     clearTimeout(this.zamanlayici);
   }
 
+  // Balondaki "Nereye ne?": kısa rehber (lib/chorus-rehber.js)
+  @action
+  rehber() {
+    this.kapat();
+    openRehber();
+  }
+
   @action
   kucult() {
     this.kapat();
@@ -397,6 +405,7 @@ class KoseKepenk extends Component {
           {{#if this.soz.link}}
             <a href={{this.soz.link}} {{on "click" this.kapat}}>{{this.soz.linkMetin}}</a>
           {{/if}}
+          <button type="button" class="kepenk-balon__rehber" {{on "click" this.rehber}}>Nereye ne? →</button>
           <div class="kepenk-balon__eylem">
             <button type="button" class="kepenk-balon__secenek" {{on "click" this.kucult}}>Küçült</button>
             <button type="button" class="kepenk-balon__secenek" {{on "click" this.gizle}}>Bugünlük gizle</button>
@@ -531,11 +540,11 @@ class AramaBos extends Component {
         </p>
         <p class="kepenk-arama__alt">Belki henüz kimse paylaşmadı. Ya da başka türlü yazılıyor: sanatçının adını tek başına dene.</p>
         <div class="kepenk-arama__kapilar">
-          <a class="chorus-oda-giris__kapi" href={{this.takilUrl}}>Takıl'da sor</a>
+          <a class="kepenk-arama__kapi" href={{this.takilUrl}}>Takıl'da sor</a>
           {{#if this.currentUser}}
-            <a class="chorus-oda-giris__kapi" href="/chat/c/kepenk-radyosu/3">Radyoyu aç</a>
+            <a class="kepenk-arama__kapi" href="/chat/c/kepenk-radyosu/3">Radyoyu aç</a>
           {{/if}}
-          <a class="chorus-oda-giris__kapi" href={{this.dinleUrl}}>Listelere göz at</a>
+          <a class="kepenk-arama__kapi" href={{this.dinleUrl}}>Listelere göz at</a>
         </div>
       </div>
     </div>

@@ -8,11 +8,15 @@ import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { extractError } from "discourse/lib/ajax-error";
 import { apiInitializer } from "discourse/lib/api";
+import { ARCHIVE_URL } from "../lib/chorus-radyo";
+import { openYazPicker } from "../lib/chorus-yaz";
+import { LISTELER } from "../lib/chorus-list-builder";
 
 // Chorus · Odalar
 // Sitenin dört odası: Dinle · Oku · Oyna · Takıl.
 // Menüde odalar (masaüstünde header'da, mobilde header'ın altında şerit),
-// bulunduğun oda işaretli; oda sayfasının başında kısa giriş;
+// bulunduğun oda işaretli; oda sayfasının ve alt bölümlerinin başında kısa giriş ve sekmeler
+// (Tümü + alt bölümler; bulunduğun sekme işaretli, okunmamışlar "n yeni"; odanın tek eylemi sağda);
 // ana sayfada Bugün ve Takıl'da konuşulanlar blokları.
 
 const ANAHTARLAR = ["dinle", "oku", "oyna", "takil"];
@@ -27,6 +31,7 @@ function odalar() {
       id: settings.oda_dinle,
       alt: "Radyo, seçkiler, listeler. Burada sadece dinlemek de katılmak sayılır.",
       bos: "Raflar daha boş. İlk seçki yolda; o gelene kadar radyo açık.",
+      eylem: { tur: "liste", ad: "+ Liste yap" },
     },
     {
       key: "oku",
@@ -48,6 +53,7 @@ function odalar() {
       id: settings.oda_takil,
       alt: "Yeni gelenler, açık masalar, ne dinlediğin, yarım işlerin. Kepenk de burada.",
       bos: "Burası henüz sessiz. İlk lafı sen at, Kepenk tepki vermeye hazır.",
+      eylem: { tur: "yaz", ad: "+ Yaz" },
     },
   ];
 }
@@ -141,7 +147,8 @@ class OdaSerit extends Component {
   </template>
 }
 
-// Oda sayfasının başı: başlık, Kepenk sesiyle tek satır, alt bölümler.
+// Oda sayfasının başı: başlık, Kepenk sesiyle tek satır, sekmeler (Tümü + alt bölümler) ve odanın eylemi.
+// Alt bölüm sayfasında da aynı giriş durur; bulunduğun sekme işaretlidir.
 // Veri render sırasında değil, sayfa değişince bir kez hesaplanır; böylece
 // bileşen yeniden çizilse bile DOM aynı kalır (oda sayfalarındaki donmanın çaresi).
 class OdaDurumu {
@@ -149,34 +156,68 @@ class OdaDurumu {
 }
 const durum = new OdaDurumu();
 
-function girisHesapla(router, site) {
+// Sekmelerde görünmeyen alt bölümler (ayar: gizli_kapilar)
+function gizliKapilar() {
+  return new Set(
+    String(settings.gizli_kapilar || "")
+      .split("|")
+      .map((x) => parseInt(x, 10))
+      .filter(Boolean)
+  );
+}
+
+function yeniSayisi(takip, id) {
+  if (!takip) {
+    return 0;
+  }
+  try {
+    return (takip.countNew({ categoryId: id }) || 0) + (takip.countUnread({ categoryId: id }) || 0);
+  } catch {
+    return 0;
+  }
+}
+
+function girisHesapla(router, site, user, takip) {
   if (!(router.currentRouteName || "").startsWith("discovery.")) {
     return null;
   }
-  const catId = router.currentRoute?.attributes?.category?.id;
-  const o = odalar().find((x) => x.id === catId);
+  const cat = router.currentRoute?.attributes?.category;
+  if (!cat?.id) {
+    return null;
+  }
+  const o = odalar().find((x) => x.id === cat.id || x.id === cat.parent_category_id);
   if (!o) {
     return null;
   }
-  const altlar = (site.categories || [])
+  const gizli = gizliKapilar();
+  const hepsi = (site.categories || [])
     .filter((c) => c.parent_category_id === o.id)
     .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
-  const toplam = [kategori(site, o.id), ...altlar].reduce(
+  const toplam = [kategori(site, o.id), ...hepsi].reduce(
     (n, c) => n + (c?.topic_count || 0),
     0
   );
+  const altSayfa = cat.id !== o.id;
+  const altKat = altSayfa ? kategori(site, cat.id) || cat : null;
   return {
     key: o.key,
     ad: o.ad,
-    alt: o.alt,
-    altlar: altlar.map((c) => ({ ad: c.name, url: c.url })),
-    radyo: o.key === "dinle" ? RADYO_URL : null,
+    alt: (altSayfa && altKat?.description_text) || o.alt,
+    tumu: odaUrl(site, o.id),
+    aktif: altSayfa ? cat.id : null,
+    altlar: hepsi
+      .filter((c) => !gizli.has(c.id) || c.id === cat.id)
+      .map((c) => ({ id: c.id, ad: c.name, url: c.url, yeni: user ? yeniSayisi(takip, c.id) : 0 })),
+    radyo: o.key === "dinle" ? (user ? RADYO_URL : ARCHIVE_URL) : null,
+    eylem: user ? o.eylem || null : null,
     bos: toplam === 0 ? o.bos : null,
   };
 }
 
 function imza(g) {
-  return g ? [g.key, g.bos || "", ...g.altlar.map((a) => a.url)].join("|") : "";
+  return g
+    ? [g.key, g.aktif || "", g.bos || "", g.eylem?.tur || "", g.radyo || "", ...g.altlar.map((a) => `${a.url}:${a.yeni}`)].join("|")
+    : "";
 }
 
 class OdaGiris extends Component {
@@ -186,13 +227,25 @@ class OdaGiris extends Component {
       return null;
     }
     const e = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    const sekme = (url, ad, { aktif = false, cls = "", ek = "" } = {}) =>
+      `<a class="chorus-oda-sekme${cls}${aktif ? " is-aktif" : ""}" href="${e(url)}"${aktif ? ' aria-current="page"' : ""}>${ek}${e(ad)}</a>`;
     const radyo = g.radyo
-      ? `<a class="chorus-oda-giris__kapi is-radyo" href="${e(g.radyo)}"><span class="chorus-oda-giris__nokta" aria-hidden="true"></span>Kepenk Radyosu</a>`
+      ? sekme(g.radyo, "Kepenk Radyosu", { cls: " is-radyo", ek: '<span class="chorus-oda-giris__nokta" aria-hidden="true"></span>' })
       : "";
-    const kapilar = g.altlar.map((a) => `<a class="chorus-oda-giris__kapi" href="${e(a.url)}">${e(a.ad)}</a>`).join("");
+    const altlar = g.altlar
+      .map((a) =>
+        sekme(a.url, a.ad, { aktif: a.id === g.aktif }).replace(
+          "</a>",
+          a.yeni ? `<small class="chorus-oda-sekme__yeni">${a.yeni} yeni</small></a>` : "</a>"
+        )
+      )
+      .join("");
+    const eylem = g.eylem
+      ? `<button type="button" class="btn btn-primary chorus-oda-eylem" data-chorus-eylem="${e(g.eylem.tur)}">${e(g.eylem.ad)}</button>`
+      : "";
     const bos = g.bos ? `<p class="chorus-oda-giris__bos"><svg class="kepenk-yuz kepenk-yuz--kucuk" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"> <g fill="#F3EEE4" stroke="#F45139" stroke-width="1.9" stroke-linejoin="round"> <path d="M4.2 11.4 L5.2 3 L10.9 7.3 Z"/> <path d="M19.8 11.4 L18.8 3 L13.1 7.3 Z"/> <ellipse cx="12" cy="13.9" rx="8.7" ry="7.5"/> </g> <path d="M10.6 7.4v1.5M12 7.1v1.8M13.4 7.4v1.5" stroke="#F45139" stroke-width="1.1" stroke-linecap="round"/> <circle cx="8.4" cy="13.4" r="1.55" fill="#1b1b1a"/> <path d="M6 10.6H10.9V13.35L6 12.35Z" fill="#F3EEE4"/> <path d="M6.5 12.4L10.3 13.2" stroke="#1b1b1a" stroke-width="1.4" stroke-linecap="round"/> <circle cx="15.6" cy="13.3" r="1.55" fill="#1b1b1a"/> <path d="M13.1 10.6H18V12.25L13.1 12.75Z" fill="#F3EEE4"/> <path d="M13.7 12.7L17.5 12.3" stroke="#1b1b1a" stroke-width="1.4" stroke-linecap="round"/> <path d="M10.4 16.9q1.1.9 2.2 0q.8-.3 1.3-.9" stroke="#1b1b1a" stroke-width="1.2" fill="none" stroke-linecap="round"/> </svg><span>${e(g.bos)}</span></p>` : "";
     return htmlSafe(
-      `<section class="chorus-oda-giris chorus-oda-giris--${e(g.key)}"><h1>${e(g.ad)}</h1><p class="chorus-oda-giris__alt">${e(g.alt)}</p><div class="chorus-oda-giris__kapilar">${radyo}${kapilar}</div>${bos}</section>`
+      `<section class="chorus-oda-giris chorus-oda-giris--${e(g.key)}"><h1>${e(g.ad)}</h1><p class="chorus-oda-giris__alt">${e(g.alt)}</p><nav class="chorus-oda-sekmeler" aria-label="${e(g.ad)} bölümleri"><div class="chorus-oda-sekmeler__liste">${sekme(g.tumu, "Tümü", { aktif: !g.aktif })}${radyo}${altlar}</div>${eylem}</nav>${bos}</section>`
     );
   }
 
@@ -236,6 +289,7 @@ class Bugun extends Component {
       { id: settings.gunun_sorusu, saat: 36, tur: "soru" },
       { id: settings.kor_dinleme, saat: 36, tur: "kor" },
       { id: settings.dort_dortluk, saat: 24 * 35, tur: "dortluk" },
+      { id: settings.olup_bitti, saat: 24 * 8, tur: "ozet" },
     ];
     const sonuc = await Promise.all(
       isler.map(async (is) => {
@@ -268,6 +322,16 @@ class Bugun extends Component {
               url,
               alt: kisi ? `${kisi} kişi tek kelime bıraktı` : "ilk kelime senden",
               git: "Dinle →",
+            };
+          }
+          if (is.tur === "ozet") {
+            return {
+              key: "ozet",
+              etiket: "OLUP BİTTİ",
+              baslik: t.fancy_title || t.title,
+              url,
+              alt: "haftanın özeti",
+              git: "Oku →",
             };
           }
           return {
@@ -527,6 +591,24 @@ class TakildaKonusulanlar extends Component {
 export default apiInitializer((api) => {
   const router = api.container.lookup("service:router");
   const site = api.container.lookup("service:site");
+  const user = api.getCurrentUser();
+  const takip = user ? api.container.lookup("service:topic-tracking-state") : null;
+
+  // Odanın eylemi: Dinle'de liste oluşturucu, Takıl'da "Ne yapmak istiyorsun?"
+  // (beşli kapısı ve liste oluşturucu yazı kutusunun açılışında devreye girer: chorus-katilim)
+  document.addEventListener("click", (ev) => {
+    const b = ev.target.closest?.("[data-chorus-eylem]");
+    if (!b) {
+      return;
+    }
+    ev.preventDefault();
+    const composer = api.container.lookup("service:composer");
+    if (b.dataset.chorusEylem === "liste") {
+      composer.openNewTopic({ category: kategori(site, LISTELER) });
+    } else {
+      openYazPicker({ composer, site, user, gununSorusu: settings.gunun_sorusu });
+    }
+  });
 
   api.headerIcons.add("chorus-odalar", OdaMenu, { before: "chorus-takil" });
   api.renderInOutlet("below-site-header", OdaSerit);
@@ -540,7 +622,7 @@ export default apiInitializer((api) => {
     ANAHTARLAR.forEach((k) =>
       document.body.classList.toggle(`chorus-oda-${k}`, k === key)
     );
-    const g = girisHesapla(router, site);
+    const g = girisHesapla(router, site, user, takip);
     if (imza(g) !== imza(durum.giris)) {
       durum.giris = g;
     }
