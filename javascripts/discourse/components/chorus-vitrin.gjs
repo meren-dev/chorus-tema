@@ -155,6 +155,10 @@ export default class ChorusVitrin extends Component {
           if (!own && items[0].tum) {
             own = (await coverFor(items[0]))?.src || null;
           }
+          // dörtten az şarkı: kolaj boş kareler bırakmasın, ilk şarkının kapağı tek başına dursun
+          if (!own && items.length < 4) {
+            own = await displayCover(items[0]);
+          }
           const covers = own ? [] : (await Promise.all(items.slice(0, 4).map(displayCover))).map((src, i) => ({ src, tone: `chorus-tone-${i % 5}` }));
           this.secki = { title: t.title, url: `/t/${t.slug}/${t.id}`, items, curated: id === 12, by: full.details?.created_by?.name || full.details?.created_by?.username, cover: own || null, covers };
           return;
@@ -231,6 +235,8 @@ export default class ChorusVitrin extends Component {
             <p class="chorus-vitrin__kicker">ŞU AN CHORUS'TA</p>
             <h1>{{this.greeting}}</h1>
           </div>
+          {{! chorus-yollar: İlk hafta (yeni gelenin dört adımı) }}
+          <PluginOutlet @name="chorus-vitrin-ilk" />
         {{else}}
         <div class="chorus-vitrin__hero">
           <p class="chorus-vitrin__kicker">CHORUS · BY COMMON HOURS</p>
