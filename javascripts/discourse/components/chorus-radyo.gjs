@@ -54,20 +54,25 @@ export default class ChorusRadyo extends Component {
 
   async load() {
     try {
-      this.songs = this.guest ? await loadArchiveSongs(3) : await loadRadioSongs();
+      this.songs = this.guest ? await loadArchiveSongs(this.sayi) : await loadRadioSongs();
     } catch {
       this.failed = true;
     }
     this.loaded = true;
   }
 
+  // Kaç şarkı gösterilir: ana sayfada üç, Dinle'nin Kepenk Radyosu sekmesinde daha fazla (@sayi)
+  get sayi() {
+    return Number(this.args.sayi) || 3;
+  }
+
   get song() {
     return this.songs.length ? this.songs[this.songs.length - 1] : null;
   }
 
-  // Son üç şarkı, en yenisi üstte
+  // Son şarkılar, en yenisi üstte
   get recent() {
-    return this.songs.slice(-3).reverse();
+    return this.songs.slice(-this.sayi).reverse();
   }
 
   // Çalınabilen son üç şarkı: en yeni en üstte; basınca oradan geriye doğru çalar
@@ -110,7 +115,10 @@ export default class ChorusRadyo extends Component {
   }
 
   get hint() {
-    return this.radioOn ? "radyo çalıyor" : "son üç şarkı baştan çalar";
+    if (this.radioOn) {
+      return "radyo çalıyor";
+    }
+    return this.sayi > 3 ? "son şarkılar baştan çalar" : "son üç şarkı baştan çalar";
   }
 
   // Seçilen satırdan başla, sonra daha eski şarkılara geç

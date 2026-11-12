@@ -438,6 +438,28 @@ body.chorus-raf-on .list-controls {
   font-style: italic;
 }
 
+/* Dinle: üstte radyo kartı (Kepenk Radyosu sekmesinde tek başına, daha çok şarkıyla) */
+.chorus-raf-radyo {
+  margin: 4px 0 28px;
+
+  .chorus-vitrin__block {
+    position: relative;
+    padding: 18px 16px;
+    border: 1px solid var(--primary-low);
+  }
+}
+
+.chorus-raf__ust-baslik {
+  margin: 0 0 14px;
+  font-size: var(--font-up-2);
+}
+
+@media (min-width: $chorus-tablet) {
+  .chorus-raf-radyo .chorus-vitrin__block {
+    padding: 22px 24px 24px;
+  }
+}
+
 /* ---------- Liste kapağı (konunun başında) ---------- */
 .cooked .chorus-kapak-kaynak {
   display: none !important;

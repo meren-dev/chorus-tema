@@ -202,11 +202,22 @@ body .chorus-vitrin.is-member {
   background: none;
 }
 
-/* Oda girişi: sekmeler sağdaki motifin altına girmesin */
+/* Oda girişi: motif başlığın ve tek satırın yanında, sekmeler altta tam genişlikte durur.
+   Motif sekme satırına inmez (alt 72 px boş), tek satır motife değmesin diye sol yarıda kalır. */
 @media (min-width: $chorus-tablet) {
-  .chorus-oda-giris .chorus-oda-sekmeler,
+  .chorus-oda-giris::after {
+    bottom: 72px;
+  }
+  .chorus-oda-giris .chorus-oda-giris__alt,
   .chorus-oda-giris .chorus-oda-giris__bos {
-    max-width: calc(100% - 400px);
+    max-width: min(62ch, 48%);
+  }
+  .chorus-oda-giris--oku::after {
+    background-size: auto min(128px, 90%);
+  }
+  .chorus-oda-giris--takil::after {
+    background-size: auto min(80px, 90%);
+    background-position: right 28px center;
   }
 }
 
