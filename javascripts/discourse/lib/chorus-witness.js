@@ -74,27 +74,23 @@ export function densityStrip(elem, topic) {
   player.after(strip);
 }
 
-export function linkWorkButton(elem, topic, composer) {
-  if (elem.querySelector(".chorus-link-work") || !topic) {
+// "+ Eser bağla": konuyu bir şarkıya, filme ya da kitaba bağlayan cevap. Düğmeler ilk gönderinin
+// menüsünde (Cevapla'nın yanında) ve konunun sonundaki cevap kutusunda (chorus-yollar).
+export function eserBagla(topic, composer) {
+  if (!topic || !composer) {
     return;
   }
-  const box = document.createElement("div");
-  box.className = "chorus-link-work";
-  box.innerHTML = `<button type="button" class="btn btn-small">Bağlantı ekle</button><span>Bu konuyu bir şarkıya, filme ya da kitaba bağla. Nedenini tek cümleyle yaz.</span>`;
-  box.querySelector("button").addEventListener("click", () => {
-    openEserDialog({
-      onDone: async ({ markdown }) => {
-        // yarım kalmış bir cevap varsa üstüne yazma, sonuna ekle
-        await composer.open({ action: "reply", topic, draftKey: topic.draft_key, draftSequence: topic.draft_sequence });
-        const m = composer.model;
-        if (m) {
-          const eski = String(m.reply || "").trim();
-          m.set("reply", eski ? `${eski}\n\n${markdown}` : markdown);
-        }
-      },
-    });
+  openEserDialog({
+    onDone: async ({ markdown }) => {
+      // yarım kalmış bir cevap varsa üstüne yazma, sonuna ekle
+      await composer.open({ action: "reply", topic, draftKey: topic.draft_key, draftSequence: topic.draft_sequence });
+      const m = composer.model;
+      if (m) {
+        const eski = String(m.reply || "").trim();
+        m.set("reply", eski ? `${eski}\n\n${markdown}` : markdown);
+      }
+    },
   });
-  elem.appendChild(box);
 }
 
 // ── Zaman etiketinin hangi şarkıya ait olduğu ─────────────────────────────
