@@ -1075,13 +1075,6 @@ body.chorus-mini-open #main-outlet { padding-bottom: calc(var(--chorus-mini-h, 1
   background: #E3FF45; opacity: 0.85; cursor: pointer;
   &:hover, &:focus-visible { opacity: 1; background: #F3EEE4; }
 }
-.chorus-link-work {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
-  margin-top: 1.2em; padding-top: 0.9em; border-top: 1px dashed var(--primary-low-mid);
-  span { color: var(--primary-medium); font-size: var(--font-down-1); }
-  .btn { background: transparent; color: #E3FF45; border: 1px solid #E3FF45; }
-  .btn:hover { background: #E3FF45; color: #171716; }
-}
 .chorus-list-story {
   margin-left: auto; background: transparent; color: var(--primary-high); border: 1px solid var(--primary-low-mid);
   font-family: var(--chorus-mono); font-size: var(--font-down-2); padding: 0.3em 0.8em; cursor: pointer;
@@ -1543,3 +1536,5 @@ body[data-chorus-dortluk-locked] [id^="post_"]:not(#post_1) .cooked { filter: bl
 @import "sadelik";
 // --- Takıl Kepenk ---
 @import "takil-kepenk";
+// --- Yollar: + Yaz, Cevapla, İlk hafta, raf, liste kapağı, radyo kuyruğu, Nereye ne? ---
+@import "yollar";
