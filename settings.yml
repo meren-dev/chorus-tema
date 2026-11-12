@@ -52,3 +52,22 @@ takil_kategorileri:
   list_type: category
   default: "17|5|9|7|6|8|13|2"
   description: "Bu kategorilerde okumadığın yeni bir şey olunca Kepenk uyanır"
+
+# --- Yollar: sekmeler, rehber, radyo kuyruğu ---
+gizli_kapilar:
+  type: list
+  list_type: category
+  default: "5|13|2"
+  description: "Oda sekmelerinde görünmeyen alt bölümler (Başla Buradan rehbere, Olup Bitti ana sayfaya, Öneri Kutusu menüye taşındı). O bölümün sayfasındayken sekmesi yine görünür."
+olup_bitti:
+  type: integer
+  default: 13
+  description: "Haftanın özeti: ana sayfadaki Bugün bloğu bu kategorideki son konuyu (8 gün içindeyse) gösterir"
+rehber_konusu:
+  type: integer
+  default: 52
+  description: "'Nereye ne?' rehberinin konu numarası. Kepenk'in balonu ve menüdeki bağlantı bu konuyu açar; 0 ise temadaki hazır metin görünür."
+radyo_kuyrugu:
+  type: integer
+  default: 26
+  description: "Kepenk Radyosu'nun kuyruk konusu (Radyoya şarkı ekle formu buraya cevap yazar)"
