@@ -63,7 +63,11 @@
       "headphones",
       "fab-reddit",
       "clock",
-      "list-ol"
+      "list-ol",
+      "compass",
+      "lightbulb",
+      "plus",
+      "radio"
     ],
     "only_theme_color_schemes": true
   },

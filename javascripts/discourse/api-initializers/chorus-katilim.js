@@ -12,7 +12,7 @@ import { EKIP, openSoruBuilder, soruBekliyor, soruZamanla } from "../lib/chorus-
 import { decorateLists } from "../lib/chorus-lists";
 import { mediaFromUrl } from "../lib/chorus-media";
 import { playQueue, seekCurrent } from "../lib/chorus-queue";
-import { densityStrip, linkWorkButton, listMoments, sixthPieces, targetFor, topicItems } from "../lib/chorus-witness";
+import { densityStrip, listMoments, sixthPieces, targetFor, topicItems } from "../lib/chorus-witness";
 import { currentSeconds, fmt, listen, seekFromChip, takeOverYoutube } from "../lib/chorus-player";
 
 // Chorus · katılım katmanı
@@ -98,7 +98,8 @@ function decorateTimestamps(elem, playable) {
 // Tek başına duran Spotify bağlantısını Spotify'ın kendi oynatıcısıyla değiştiriyoruz.
 const SPOTIFY = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(track|album|playlist|episode|artist|show)\/([A-Za-z0-9]{22})/;
 
-function embedSpotify(elem) {
+// Liste konusunda tüm listenin oynatıcısı küçük (152 px): kapak gönderinin başında durur (chorus-yollar)
+function embedSpotify(elem, kompakt = false) {
   elem.querySelectorAll('a[href*="open.spotify.com/"]').forEach((a) => {
     if (a.closest("blockquote, aside.quote, .chorus-spotify")) {
       return;
@@ -117,14 +118,27 @@ function embedSpotify(elem) {
     const f = document.createElement("iframe");
     f.src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?theme=0`;
     f.width = "100%";
-    f.height = m[1] === "track" || m[1] === "episode" ? "152" : "352";
+    f.height = m[1] === "track" || m[1] === "episode" || kompakt ? "152" : "352";
     f.setAttribute("frameborder", "0");
     f.setAttribute("allow", "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture");
     f.setAttribute("loading", "lazy");
     f.title = "Spotify oynatıcı";
     box.appendChild(f);
+    if (kompakt) {
+      box.classList.add("is-kompakt");
+    }
     block.replaceWith(box);
   });
+  // Discourse'un kendi önizlemesi zaten oynatıcıysa (Spotify'ın 352 px'lik iframe'i) onu da küçült
+  if (kompakt) {
+    elem.querySelectorAll('iframe[src*="open.spotify.com/embed/playlist/"], iframe[src*="open.spotify.com/embed/album/"]').forEach((f) => {
+      if (f.closest("li, blockquote, aside.quote")) {
+        return;
+      }
+      f.setAttribute("height", "152");
+      f.classList.add("chorus-kompakt");
+    });
+  }
 }
 
 function isRevealed(topic, user) {
@@ -234,6 +248,7 @@ export default apiInitializer((api) => {
               const site = api.container.lookup("service:site");
               openListBuilder({
                 staff: isCurator(user),
+                secki: cat === CHORUS_SECKILERI,
                 onDone: ({ title, body, categoryId, tags }) =>
                   this.openNewTopic({ category: (site.categories || []).find((c) => c.id === categoryId), title, body, tags }),
               });
@@ -299,7 +314,7 @@ export default apiInitializer((api) => {
 
       // 0 · Spotify oynatıcısı ve saniyesi izlenebilen YouTube oynatıcısı
       decorateLists(elem, topic ? { title: topic.title, url: `/t/${topic.slug}/${topic.id}` } : null);
-      embedSpotify(elem);
+      embedSpotify(elem, post?.post_number === 1 && [LISTELER, CHORUS_SECKILERI].includes(topic?.category_id));
       takeOverYoutube(elem);
       // bağlanan eserler: Instagram gömülü, eski biçimdeki "Eserin bağlantısı: …" önizlemeli
       // (yazı kutusunun önizlemesinde değil: her tuşta yeniden yüklenmesin)
@@ -327,15 +342,12 @@ export default apiInitializer((api) => {
         }
       }
 
-      // 8 · aktif tanık: ilk gönderide yoğunluk şeridi ve "Bir eser bağla"
+      // 8 · aktif tanık: ilk gönderide yoğunluk şeridi ("+ Eser bağla" artık Cevapla'nın yanında: chorus-yollar)
       if (post?.post_number === 1 && topic) {
         densityStrip(elem, topic);
         listMoments(elem, topic);
         if (topic.category_id === BESLILER) {
           sixthPieces(elem, topic, user, api.container.lookup("service:composer"));
-        }
-        if ([6, 10, 12].includes(topic.category_id) && user) {
-          linkWorkButton(elem, topic, api.container.lookup("service:composer"));
         }
       }
 

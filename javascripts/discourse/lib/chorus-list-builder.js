@@ -1,8 +1,11 @@
 // Chorus · Liste oluştur
 // Bağlantıyı yapıştır, şarkının adı ve sanatçısı kendiliğinden gelsin; sırala, her şarkıya tek cümle yaz.
 // Sonuç her yerde aynı biçimdeki listedir: yeni konu olarak açılır ya da yazı kutusuna eklenir.
-// Tüm liste (Spotify/YouTube çalma listesi) varsa şarkı eklemek isteğe bağlıdır; listenin görseli
-// istenirse kapak olur (konunun görseli: vitrin, paylaşım önizlemesi). Gönderide tüm liste üstte durur.
+// Tüm liste (Spotify/YouTube çalma listesi) varsa şarkı eklemek isteğe bağlıdır. Kapak üç yoldan:
+// listenin kendi görseli, kendi yüklediğin görsel ya da şarkıların kapaklarından kolaj. Kapak konunun
+// görseli olur (raf, vitrin, paylaşım önizlemesi) ve gönderinin başında durur (chorus-yollar).
+import { ajax } from "discourse/lib/ajax";
+import { extractError } from "discourse/lib/ajax-error";
 import { coverFor, itemsToMarkdown, mediaFromUrl, oembed, resolveMeta } from "./chorus-media";
 
 export const LISTELER = 10;
@@ -17,6 +20,44 @@ export function isCurator(user) {
   return !!user && (user.staff || (user.groups || []).some((g) => g.name === "kuratorler"));
 }
 
+// Kapak için yeterli boy: uzun kenar 1200 px, JPEG. Sunucunun önündeki vekil 1 MB üstünü geri çeviriyor;
+// telefon fotoğrafları da böylece hızlı yüklenir. GIF ve SVG olduğu gibi gider.
+async function kucult(file, enUzun = 1200) {
+  if (!/^image\/(jpeg|png|webp|heic|heif|avif)$/i.test(file.type) || typeof createImageBitmap !== "function") {
+    return file;
+  }
+  const bmp = await createImageBitmap(file).catch(() => null);
+  if (!bmp) {
+    return file;
+  }
+  const oran = Math.min(1, enUzun / Math.max(bmp.width, bmp.height));
+  if (oran === 1 && file.size < 800 * 1024) {
+    return file;
+  }
+  const c = document.createElement("canvas");
+  c.width = Math.round(bmp.width * oran);
+  c.height = Math.round(bmp.height * oran);
+  const ctx = c.getContext("2d");
+  ctx.fillStyle = "#171716";
+  ctx.fillRect(0, 0, c.width, c.height);
+  ctx.drawImage(bmp, 0, 0, c.width, c.height);
+  for (const kalite of [0.86, 0.72, 0.6]) {
+    const blob = await new Promise((res) => c.toBlob(res, "image/jpeg", kalite));
+    if (blob && (blob.size < 900 * 1024 || kalite === 0.6)) {
+      return new File([blob], `${String(file.name || "kapak").replace(/\.\w+$/, "")}.jpg`, { type: "image/jpeg" });
+    }
+  }
+  return file;
+}
+
+// Kendi kapağın: Discourse'a yüklenir, gönderiye upload:// adresiyle girer
+async function gorselYukle(file) {
+  const fd = new FormData();
+  fd.append("upload_type", "composer");
+  fd.append("file", await kucult(file));
+  return ajax("/uploads.json", { type: "POST", data: fd, processData: false, contentType: false });
+}
+
 function esc(s) {
   return String(s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 }
@@ -24,8 +65,9 @@ function esc(s) {
 /**
  * mode "topic": ad, giriş ve kategori sorulur; onDone({ title, body, categoryId })
  * mode "insert": yalnızca şarkılar; onDone({ markdown })
+ * secki: küratör seçkiler bölümünden açtıysa "Chorus seçkisi olarak yayımla" işaretli gelir
  */
-export function openListBuilder({ mode = "topic", staff = false, onDone }) {
+export function openListBuilder({ mode = "topic", staff = false, secki = false, onDone }) {
   document.querySelector(".chorus-builder")?.remove();
   const items = [];
   const wrap = document.createElement("div");
@@ -47,16 +89,28 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
                <div class="chorus-builder__kaynak-bilgi">
                  <strong></strong>
                  <small></small>
-                 <label class="chorus-builder__check chorus-builder__kapak-sec"><input name="kapak" type="checkbox" checked> Kapak olarak bu görseli kullan</label>
                </div>
              </div>
+             <fieldset class="chorus-builder__kapak-secim">
+               <legend>Kapak <small>rafta, ana sayfada ve paylaşım önizlemesinde görünür</small></legend>
+               <label class="chorus-builder__secim" data-kapak="liste" hidden><input type="radio" name="kapakTuru" value="liste"> <span>Listenin kendi görseli</span></label>
+               <label class="chorus-builder__secim"><input type="radio" name="kapakTuru" value="kendi"> <span>Kendi görselim</span></label>
+               <label class="chorus-builder__secim"><input type="radio" name="kapakTuru" value="kolaj" checked> <span>Şarkıların kapaklarından kolaj</span></label>
+               <div class="chorus-builder__yukle" hidden>
+                 <img class="chorus-builder__kapak chorus-builder__kendi" alt="" width="64" height="64" hidden>
+                 <div class="chorus-builder__yukle-bilgi">
+                   <button type="button" class="btn btn-small" data-b="gorsel">Görsel seç</button>
+                   <small class="chorus-builder__yukle-durum">Kare görseller en iyi görünür.</small>
+                 </div>
+                 <input type="file" name="gorsel" accept="image/*" hidden>
+               </div>
+             </fieldset>
              <label class="chorus-builder__check"><input name="ortak" type="checkbox"> Ortak liste: herkes şarkı ekleyebilsin</label>
              ${
                staff
-                 ? `<label class="chorus-builder__check"><input name="curated" type="checkbox"> Chorus seçkisi olarak yayımla</label>`
+                 ? `<label class="chorus-builder__check"><input name="curated" type="checkbox"${secki ? " checked" : ""}> Chorus seçkisi olarak yayımla</label>`
                  : ""
-             }
-             <p class="chorus-builder__ipucu">Kapak: tüm listenin görseli; o yoksa ilk dört şarkının kapağından kolaj. Kendi görselini kullanacaksan kutuyu kaldır, görseli yazı kutusuna ekle.</p>`
+             }`
           : ""
       }
       <div class="chorus-builder__add">
@@ -80,6 +134,55 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
   let kaynak = null; // tanınan tüm liste: { media, title, cover }
   let kaynakSira = 0;
   let adElle = false; // listenin adını kişi yazdıysa tüm listenin adıyla değiştirme
+  let kendiKapak = null; // yüklenen görsel: { short_url, url }
+  let yukleniyor = null; // süren yükleme (gönderirken beklenir)
+  let kapakElle = false; // kişi kapak türünü kendisi seçtiyse tüm liste gelince değiştirme
+  const kapakTuru = () => form.querySelector('input[name="kapakTuru"]:checked')?.value || "kolaj";
+  const kapakSec = (tur) => {
+    const r = form.querySelector(`input[name="kapakTuru"][value="${tur}"]`);
+    if (r) {
+      r.checked = true;
+    }
+    kapakGoster();
+  };
+  const yukleKutu = wrap.querySelector(".chorus-builder__yukle");
+  const listeSecenek = wrap.querySelector('[data-kapak="liste"]');
+  function kapakGoster() {
+    if (yukleKutu) {
+      yukleKutu.hidden = kapakTuru() !== "kendi";
+    }
+  }
+  async function gorselSecildi(file) {
+    if (!file) {
+      return;
+    }
+    const durum = wrap.querySelector(".chorus-builder__yukle-durum");
+    const onizleme = wrap.querySelector(".chorus-builder__kendi");
+    if (!/^image\//.test(file.type)) {
+      durum.textContent = "Bu bir görsel değil.";
+      return;
+    }
+    durum.textContent = "Yükleniyor…";
+    kendiKapak = null;
+    yukleniyor = gorselYukle(file)
+      .then((r) => {
+        kendiKapak = r?.short_url || r?.url ? { short_url: r.short_url, url: r.url } : null;
+        if (kendiKapak) {
+          onizleme.src = r.url;
+          onizleme.hidden = false;
+          durum.textContent = "Yüklendi. Değiştirmek için yeniden seç.";
+        } else {
+          durum.textContent = "Yüklenemedi; bir daha dene.";
+        }
+      })
+      .catch((err) => {
+        durum.textContent = err?.jqXHR?.status === 413 ? "Görsel çok büyük; daha küçük bir görsel dene." : extractError(err);
+      })
+      .finally(() => {
+        yukleniyor = null;
+      });
+    await yukleniyor;
+  }
 
   // Tüm liste bağlantısı: adını ve görselini göster, ad boşsa listenin adını öner
   async function kaynakBak(uyar = false) {
@@ -93,6 +196,12 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
     if (!media) {
       kaynak = null;
       kaynakKutu.hidden = true;
+      if (listeSecenek) {
+        listeSecenek.hidden = true;
+        if (kapakTuru() === "liste") {
+          kapakSec("kolaj");
+        }
+      }
       if (v && uyar) {
         msg.textContent = "Tüm liste bağlantısını tanıyamadım. Spotify ya da YouTube çalma listesi olmalı.";
       }
@@ -115,7 +224,15 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
     if (kaynak.cover) {
       img.src = kaynak.cover;
     }
-    kaynakKutu.querySelector(".chorus-builder__kapak-sec").hidden = !kaynak.cover;
+    if (listeSecenek) {
+      listeSecenek.hidden = !kaynak.cover;
+      listeSecenek.querySelector("span").textContent = `${media.kind === "spotify" ? "Spotify'daki" : "YouTube'daki"} kapağı`;
+      if (kaynak.cover && !kapakElle) {
+        kapakSec("liste");
+      } else if (!kaynak.cover && kapakTuru() === "liste") {
+        kapakSec("kolaj");
+      }
+    }
     const ad = form.elements.title;
     if (ad && kaynak.title && (!ad.value.trim() || !adElle)) {
       ad.value = kaynak.title;
@@ -201,6 +318,19 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
     } else if (b === "del") {
       items.splice(i, 1);
       draw();
+    } else if (b === "gorsel") {
+      form.elements.gorsel?.click();
+    }
+  });
+  form.addEventListener("change", (e) => {
+    if (e.target.name === "kapakTuru") {
+      kapakElle = true;
+      kapakGoster();
+      if (e.target.value === "kendi" && !kendiKapak && !yukleniyor) {
+        form.elements.gorsel?.click();
+      }
+    } else if (e.target.name === "gorsel") {
+      gorselSecildi(e.target.files?.[0]);
     }
   });
   link.addEventListener("keydown", (e) => {
@@ -264,8 +394,21 @@ export function openListBuilder({ mode = "topic", staff = false, onDone }) {
     const sourceUrl = sourceMedia?.url || "";
     const ortak = !!form.elements.ortak?.checked;
     const curated = !!form.elements.curated?.checked;
-    const kapak =
-      kaynak?.cover && kaynak.media.url === sourceUrl && form.elements.kapak?.checked ? `![${KAPAK_ALT}](${kaynak.cover})` : "";
+    let kapak = "";
+    const tur = kapakTuru();
+    if (tur === "kendi") {
+      if (yukleniyor) {
+        msg.textContent = "Görsel yükleniyor…";
+        await yukleniyor;
+      }
+      if (!kendiKapak) {
+        msg.textContent = "Kendi görselini seç ya da başka bir kapak seç.";
+        return;
+      }
+      kapak = `![${KAPAK_ALT}](${kendiKapak.short_url || kendiKapak.url})`;
+    } else if (tur === "liste" && kaynak?.cover && kaynak.media.url === sourceUrl) {
+      kapak = `![${KAPAK_ALT}](${kaynak.cover})`;
+    }
     // Sıra: (gizli) kapak, giriş, tüm liste, şarkılar, davet
     const body = [
       kapak,

@@ -8,6 +8,15 @@ import { mediaFromUrl } from "./chorus-media";
 import { el } from "./chorus-oyun";
 
 const INSTAGRAM = /^https?:\/\/(?:www\.)?instagram\.com\/(?:[\w.]+\/)?(p|reel|reels|tv)\/([\w-]+)/i;
+// IMDb, Chorus'un sunucusuna önizleme vermiyor (403). Aynı filmin Letterboxd sayfası
+// letterboxd.com/imdb/tt…/ adresinden açılıyor ve görselle önizleniyor.
+const IMDB = /^https?:\/\/(?:www\.|m\.)?imdb\.com\/(?:[a-z]{2}\/)?title\/(tt\d{5,10})/i;
+
+export function eserAdresi(url) {
+  const u = String(url || "").trim();
+  const m = u.match(IMDB);
+  return m ? `https://letterboxd.com/imdb/${m[1]}/` : u;
+}
 const ESKI_BICIM = /^eserin bağlantısı\s*:/i;
 
 // Instagram'ın gömülü görünümü yüksekliğini kendisi bildirir; iframe'i ona göre uzat
@@ -101,7 +110,7 @@ export async function eserOnizlemesi(url) {
   if (media?.kind === "spotify") {
     return spotifyKutu(media);
   }
-  const html = await oneboxGetir(url);
+  const html = await oneboxGetir(eserAdresi(url));
   if (!html) {
     return null;
   }
@@ -129,7 +138,9 @@ export function eserleriGoster(elem) {
       p.replaceWith(instagramKutu(href));
       return;
     }
-    if (!eski) {
+    // tek başına duran IMDb bağlantısı önizlenemedi: Letterboxd'daki aynı filmin önizlemesi altına
+    const imdb = tek && IMDB.test(href);
+    if (!eski && !imdb) {
       return;
     }
     eserOnizlemesi(href).then((kutu) => {
@@ -190,6 +201,9 @@ export function openEserDialog({ onDone }) {
     alan.replaceChildren();
     if (kutu) {
       alan.appendChild(kutu);
+      if (eserAdresi(url) !== url) {
+        alan.appendChild(el("small", "chorus-eser__not", "IMDb önizleme vermiyor; aynı filmin Letterboxd sayfasını ekliyorum."));
+      }
     } else {
       alan.textContent = "Bu bağlantının önizlemesi yok; bağlantı yine de eklenir.";
     }
@@ -209,7 +223,7 @@ export function openEserDialog({ onDone }) {
   });
   form.addEventListener("submit", (e) => {
     e.preventDefault();
-    const url = form.elements.url.value.trim();
+    const url = eserAdresi(form.elements.url.value.trim());
     const neden = form.elements.neden.value.replace(/\s+/g, " ").trim();
     if (!/^https?:\/\/\S+$/i.test(url)) {
       msg.textContent = "Eserin bağlantısını yapıştır (https:// ile başlayan).";

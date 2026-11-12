@@ -153,14 +153,26 @@ body:has(.chorus-takil.is-uyanik) .chorus-oda-serit .chorus-oda--takil::after {
   font-size: var(--font-0);
 }
 
-/* Telefonda alt bölümler tek satırda yana kayar (dört satır düğme yerine);
-   şerit bloğun kenarına kadar uzanır, yarım görünen düğme kaydırılabildiğini söyler */
-.chorus-oda-giris__kapilar {
+/* Sekmeler: Tümü + alt bölümler. Altı çizili yazı; bulunduğun sekme parlak, altında domates çizgi.
+   Telefonda tek satırda yana kayar (şerit bloğun kenarına kadar uzanır, yarım görünen sekme
+   kaydırılabildiğini söyler); odanın eylemi (+ Yaz, + Liste yap) sekmelerin üstünde sağda durur. */
+.chorus-oda-sekmeler {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 4px 0 0;
+}
+
+.chorus-oda-sekmeler__liste {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0.5em;
+  align-items: flex-end;
+  gap: 22px;
+  align-self: stretch;
   margin: 0 -16px;
-  padding: 2px 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--primary-low);
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
@@ -168,34 +180,58 @@ body:has(.chorus-takil.is-uyanik) .chorus-oda-serit .chorus-oda--takil::after {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
-.chorus-oda-giris__kapilar::-webkit-scrollbar {
+.chorus-oda-sekmeler__liste::-webkit-scrollbar {
   display: none;
 }
 
-.chorus-oda-giris__kapi,
-.chorus-oda-giris__kapi:visited {
+.chorus-oda-sekme,
+.chorus-oda-sekme:visited {
+  position: relative;
   display: inline-flex;
   flex: none;
   align-items: center;
   gap: 0.45em;
-  min-height: 40px;
-  padding: 0.45em 0.9em;
-  border: 1px solid var(--primary-low-mid);
-  border-radius: 999px;
-  color: var(--primary);
-  font-size: var(--font-down-1);
-  font-weight: 600;
+  min-height: 44px;
+  padding: 0 0 2px;
+  color: var(--primary-medium);
+  font-size: var(--font-0);
+  font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
   scroll-snap-align: start;
 }
 
-.chorus-oda-giris__kapi:hover {
-  border-color: var(--primary-high);
+.chorus-oda-sekme:hover,
+.chorus-oda-sekme:focus-visible {
+  color: var(--primary);
 }
 
-.chorus-oda-giris__kapi .chorus-radyo__dot {
-  margin: 0;
+.chorus-oda-sekme.is-aktif {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.chorus-oda-sekme.is-aktif::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: #f45139;
+}
+
+.chorus-oda-sekme__yeni {
+  font-family: var(--chorus-mono);
+  font-size: var(--font-down-2);
+  font-weight: 400;
+  color: #e3ff45;
+}
+
+.chorus-oda-eylem {
+  flex: none;
+  align-self: flex-end;
+  white-space: nowrap;
 }
 
 /* Kepenk Radyosu düğmesindeki canlı nokta */
@@ -235,20 +271,26 @@ body:has(.chorus-takil.is-uyanik) .chorus-oda-serit .chorus-oda--takil::after {
     font-size: var(--font-up-1);
   }
 
-  .chorus-oda-giris__kapilar {
-    flex-wrap: wrap;
-    margin: 0;
-    padding: 0;
-    overflow: visible;
-    scroll-snap-type: none;
+  .chorus-oda-sekmeler {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 20px;
   }
 
-  .chorus-oda-giris__kapi,
-  .chorus-oda-giris__kapi:visited {
-    flex: 0 1 auto;
-    min-height: auto;
-    padding: 0.45em 0.8em;
-    white-space: normal;
+  .chorus-oda-sekmeler__liste {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .chorus-oda-sekme,
+  .chorus-oda-sekme:visited {
+    min-height: 40px;
+  }
+
+  .chorus-oda-eylem {
+    margin-bottom: 8px;
   }
 }
 
