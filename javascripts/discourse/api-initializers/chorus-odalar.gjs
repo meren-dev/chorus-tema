@@ -8,7 +8,8 @@ import { fn } from "@ember/helper";
 import { action } from "@ember/object";
 import { extractError } from "discourse/lib/ajax-error";
 import { apiInitializer } from "discourse/lib/api";
-import { ARCHIVE_URL } from "../lib/chorus-radyo";
+import DiscourseURL from "discourse/lib/url";
+import { radyoGorunumu } from "../lib/chorus-radyo-gorunum";
 import { openYazPicker } from "../lib/chorus-yaz";
 import { LISTELER } from "../lib/chorus-list-builder";
 
@@ -21,7 +22,6 @@ import { LISTELER } from "../lib/chorus-list-builder";
 
 const ANAHTARLAR = ["dinle", "oku", "oyna", "takil"];
 const RADYO_YOLU = "/chat/c/kepenk-radyosu";
-const RADYO_URL = "/chat/c/kepenk-radyosu/3";
 
 function odalar() {
   return [
@@ -208,7 +208,7 @@ function girisHesapla(router, site, user, takip) {
     altlar: hepsi
       .filter((c) => !gizli.has(c.id) || c.id === cat.id)
       .map((c) => ({ id: c.id, ad: c.name, url: c.url, yeni: user ? yeniSayisi(takip, c.id) : 0 })),
-    radyo: o.key === "dinle" ? (user ? RADYO_URL : ARCHIVE_URL) : null,
+    radyo: o.key === "dinle",
     eylem: user ? o.eylem || null : null,
     bos: toplam === 0 ? o.bos : null,
   };
@@ -227,10 +227,17 @@ class OdaGiris extends Component {
       return null;
     }
     const e = (x) => String(x).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-    const sekme = (url, ad, { aktif = false, cls = "", ek = "" } = {}) =>
-      `<a class="chorus-oda-sekme${cls}${aktif ? " is-aktif" : ""}" href="${e(url)}"${aktif ? ' aria-current="page"' : ""}>${ek}${e(ad)}</a>`;
+    const sekme = (url, ad, { aktif = false, cls = "", ek = "", ozellik = "" } = {}) =>
+      `<a class="chorus-oda-sekme${cls}${aktif ? " is-aktif" : ""}" href="${e(url)}"${aktif ? ' aria-current="page"' : ""}${ozellik}>${ek}${e(ad)}</a>`;
+    // Kepenk Radyosu sekmesi: Dinle'nin içinde radyoyu açar (sohbet çekmecesi "Radyoya gir"de)
+    const radyoAktif = !!g.radyo && !g.aktif && radyoGorunumu.acik;
     const radyo = g.radyo
-      ? sekme(g.radyo, "Kepenk Radyosu", { cls: " is-radyo", ek: '<span class="chorus-oda-giris__nokta" aria-hidden="true"></span>' })
+      ? sekme(`${g.tumu}#radyo`, "Kepenk Radyosu", {
+          aktif: radyoAktif,
+          cls: " is-radyo",
+          ek: '<span class="chorus-oda-giris__nokta" aria-hidden="true"></span>',
+          ozellik: " data-chorus-radyo-sekme",
+        })
       : "";
     const altlar = g.altlar
       .map((a) =>
@@ -245,7 +252,7 @@ class OdaGiris extends Component {
       : "";
     const bos = g.bos ? `<p class="chorus-oda-giris__bos"><svg class="kepenk-yuz kepenk-yuz--kucuk" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"> <g fill="#F3EEE4" stroke="#F45139" stroke-width="1.9" stroke-linejoin="round"> <path d="M4.2 11.4 L5.2 3 L10.9 7.3 Z"/> <path d="M19.8 11.4 L18.8 3 L13.1 7.3 Z"/> <ellipse cx="12" cy="13.9" rx="8.7" ry="7.5"/> </g> <path d="M10.6 7.4v1.5M12 7.1v1.8M13.4 7.4v1.5" stroke="#F45139" stroke-width="1.1" stroke-linecap="round"/> <circle cx="8.4" cy="13.4" r="1.55" fill="#1b1b1a"/> <path d="M6 10.6H10.9V13.35L6 12.35Z" fill="#F3EEE4"/> <path d="M6.5 12.4L10.3 13.2" stroke="#1b1b1a" stroke-width="1.4" stroke-linecap="round"/> <circle cx="15.6" cy="13.3" r="1.55" fill="#1b1b1a"/> <path d="M13.1 10.6H18V12.25L13.1 12.75Z" fill="#F3EEE4"/> <path d="M13.7 12.7L17.5 12.3" stroke="#1b1b1a" stroke-width="1.4" stroke-linecap="round"/> <path d="M10.4 16.9q1.1.9 2.2 0q.8-.3 1.3-.9" stroke="#1b1b1a" stroke-width="1.2" fill="none" stroke-linecap="round"/> </svg><span>${e(g.bos)}</span></p>` : "";
     return htmlSafe(
-      `<section class="chorus-oda-giris chorus-oda-giris--${e(g.key)}"><h1>${e(g.ad)}</h1><p class="chorus-oda-giris__alt">${e(g.alt)}</p><nav class="chorus-oda-sekmeler" aria-label="${e(g.ad)} bölümleri"><div class="chorus-oda-sekmeler__liste">${sekme(g.tumu, "Tümü", { aktif: !g.aktif })}${radyo}${altlar}</div>${eylem}</nav>${bos}</section>`
+      `<section class="chorus-oda-giris chorus-oda-giris--${e(g.key)}"><h1>${e(g.ad)}</h1><p class="chorus-oda-giris__alt">${e(g.alt)}</p><nav class="chorus-oda-sekmeler" aria-label="${e(g.ad)} bölümleri"><div class="chorus-oda-sekmeler__liste">${sekme(g.tumu, "Tümü", { aktif: !g.aktif && !radyoAktif })}${radyo}${altlar}</div>${eylem}</nav>${bos}</section>`
     );
   }
 
@@ -594,6 +601,38 @@ export default apiInitializer((api) => {
   const user = api.getCurrentUser();
   const takip = user ? api.container.lookup("service:topic-tracking-state") : null;
 
+  // Dinle'nin Kepenk Radyosu sekmesi sayfanın içinde açılır; başka bir sekmeye basınca kapanır.
+  // Yakalama evresinde: Discourse bağlantıyı yönlendirmeden önce. Yeni sekmede açmak (⌘/Ctrl) serbest.
+  const dinleUrl = () => odaUrl(site, settings.oda_dinle);
+  const yol = (url) => String(url || "").split(/[?#]/)[0];
+  document.addEventListener(
+    "click",
+    (ev) => {
+      if (ev.defaultPrevented || ev.button !== 0 || ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.altKey) {
+        return;
+      }
+      const radyoSekme = ev.target.closest?.("[data-chorus-radyo-sekme]");
+      if (radyoSekme) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        radyoGorunumu.acik = true;
+        if (yol(router.currentURL) === dinleUrl()) {
+          window.history.replaceState(window.history.state, "", `${dinleUrl()}#radyo`);
+        } else {
+          DiscourseURL.routeTo(dinleUrl());
+        }
+        return;
+      }
+      if (radyoGorunumu.acik && ev.target.closest?.(".chorus-oda-sekme")) {
+        radyoGorunumu.acik = false;
+        if (window.location.hash === "#radyo") {
+          window.history.replaceState(window.history.state, "", window.location.pathname + window.location.search);
+        }
+      }
+    },
+    true
+  );
+
   // Odanın eylemi: Dinle'de liste oluşturucu, Takıl'da "Ne yapmak istiyorsun?"
   // (beşli kapısı ve liste oluşturucu yazı kutusunun açılışında devreye girer: chorus-katilim)
   document.addEventListener("click", (ev) => {
@@ -617,7 +656,15 @@ export default apiInitializer((api) => {
   api.renderInOutlet("chorus-vitrin-takil", TakildaKonusulanlar);
 
   // Bulunduğun oda: body'de chorus-oda-<oda> sınıfı; menüde o oda işaretlenir
-  api.onPageChange(() => {
+  api.onPageChange((url) => {
+    // Radyo görünümü yalnızca Dinle'nin kendi sayfasında; /c/dinle/…#radyo ile doğrudan açılır
+    if (yol(url) !== dinleUrl()) {
+      radyoGorunumu.acik = false;
+    } else if (window.location.hash === "#radyo") {
+      radyoGorunumu.acik = true;
+    } else if (radyoGorunumu.acik) {
+      window.history.replaceState(window.history.state, "", `${dinleUrl()}#radyo`);
+    }
     const key = aktifOda(router, site);
     ANAHTARLAR.forEach((k) =>
       document.body.classList.toggle(`chorus-oda-${k}`, k === key)

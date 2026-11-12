@@ -18,6 +18,8 @@ import { ARCHIVE_TOPIC, CHANNEL_PATH, CHANNEL_URL, isRadioEvent } from "../lib/c
 import { kuyrukAyarla, kuyrukKonusu, kuyrukSusle, openRadyoForm, radyoyaEkleDugmesi } from "../lib/chorus-radyo-kuyruk";
 import { openRehber, rehberAdresi, rehberAyarla } from "../lib/chorus-rehber";
 import { eserBagla } from "../lib/chorus-witness";
+import ChorusRadyo from "../components/chorus-radyo";
+import { radyoGorunumu } from "../lib/chorus-radyo-gorunum";
 import { openYazPicker } from "../lib/chorus-yaz";
 
 // Chorus · Yollar
@@ -350,6 +352,15 @@ class ListeRafi extends Component {
     document.body.classList.remove("chorus-raf-on");
   }
 
+  // Dinle'nin kendi sayfası: üstte radyo, altta raf; Kepenk Radyosu sekmesinde yalnızca radyo
+  get dinleKoku() {
+    return this.catId === (Number(settings.oda_dinle) || 14);
+  }
+
+  get radyoAcik() {
+    return this.dinleKoku && radyoGorunumu.acik;
+  }
+
   // Glimmer'da boş dizi "yok" sayılır; boş raf ayrıca sorulur
   get bos() {
     return Array.isArray(this.kartlar) && this.kartlar.length === 0;
@@ -439,6 +450,17 @@ class ListeRafi extends Component {
 
   <template>
     {{#if this.acik}}
+      {{#if this.radyoAcik}}
+        <section class="chorus-raf-radyo is-tam" aria-label="Kepenk Radyosu">
+          <ChorusRadyo @sayi={{10}} />
+        </section>
+      {{else}}
+      {{#if this.dinleKoku}}
+        <section class="chorus-raf-radyo" aria-label="Kepenk Radyosu">
+          <ChorusRadyo />
+        </section>
+        <h2 class="chorus-raf__ust-baslik">Seçkiler ve listeler</h2>
+      {{/if}}
       <section class="chorus-raf" aria-label="Listeler rafı">
         {{#if this.kartlar.length}}
           <div class="chorus-raf__izgara">
@@ -463,6 +485,7 @@ class ListeRafi extends Component {
           <p class="chorus-raf__bos">Raf boş. İlk listeyi sen kur: sağ üstteki + Liste yap.</p>
         {{/if}}
       </section>
+      {{/if}}
     {{/if}}
   </template>
 }
